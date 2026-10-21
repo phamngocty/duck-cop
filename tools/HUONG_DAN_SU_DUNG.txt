@@ -1,0 +1,63 @@
+================================================================================
+   HƯỚNG DẪN SỬ DỤNG VÀ NẠP ÂM THANH CÒI XE ESP32-C3 SPEED FX
+   Bản quyền: Tự Làm Điện Tử (Dành riêng cho khách hàng & người dùng)
+================================================================================
+
+I. ĐẶC TÍNH NỔI BẬT CỦA CÒI XE:
+--------------------------------------------------------------------------------
+- Sử dụng vi điều khiển ESP32-C3 kết hợp chip khuếch đại âm thanh PAM8403.
+- Khởi động siêu tốc 100%: Phát to rõ cực đại ngay mili-giây đầu tiên khi bật chìa khóa xe.
+- Bộ nhớ lưu trữ 5 tiếng còi độc lập (Slot 0 đến Slot 4).
+- Ghi nhớ vĩnh viễn tiếng đã chọn ngay cả khi tắt khóa xe hoặc rút ắc quy.
+- Tuyệt đối an toàn: Không bị sụt nguồn, dòng khởi động phẳng lì.
+
+II. CÁCH ĐỔI TIẾNG TRỰC TIẾP TRÊN XE (KHÔNG CẦN DÙNG MÁY TÍNH):
+--------------------------------------------------------------------------------
+1. Mạch đã có sẵn đường dây nối ra Nút Bấm Phụ trên tay lái xe (hoặc nút BOOT trên mạch).
+2. Khi đang bật chìa khóa xe:
+   - Nhấn nhả nhanh nút 1 cái (nhấn dưới 1 giây rồi thả tay ra).
+   - Còi sẽ chuyển ngay sang tiếng tiếp theo:
+       Slot 0 -> Slot 1 -> Slot 2 -> Slot 3 -> Slot 4 -> quay lại Slot 0.
+   - Còi sẽ phát thử ngay tiếng mới để bạn nghe và tự động lưu nhớ lại.
+3. Tắt khóa xe rồi bật lại -> Còi sẽ luôn kêu đúng tiếng bạn vừa chọn!
+
+III. DANH SÁCH BỘ SƯU TẬP ÂM MẪU SẴN CÓ TRONG AUDIO STUDIO (9+ TIẾNG):
+--------------------------------------------------------------------------------
+- 🦆 Slot 0: Vịt Còi Xe Chuẩn (Tiếng vịt đanh giòn, kêu to vang xa, chuẩn âm lượng)
+- 🦆 Slot 1: Vịt Kêu Đơn (Quạc dứt khoát 1 nhịp nhanh gọn)
+- 🦆 Slot 2: Vịt Còi Đôi (Quạc... Quạc kép vang xa)
+- 🐮 Slot 3: Bò Rống (Tiếng bò kêu trầm ấm, độc đáo)
+- 🚨 Slot 4: Còi Cảnh Sát (Hụ còi ưu tiên dồn dập)
+- 🏍️ Tiếng Còi Xe Máy Bim Bim (Hợp âm kép còi zin xe máy đanh thép)
+- 🚂 Tiếng Còi Tàu Hỏa (Kèn ba bè trầm hùng, âm vang cực xa)
+- 🔫 Tiếng Súng Laser Sci-Fi (Âm thanh không gian viễn tưởng vui nhộn)
+- 😂 Tiếng Vịt Donald Cười (Tràng cười quác quác ngộ nghĩnh)
+
+IV. HƯỚNG DẪN TỰ ĐỔI TIẾNG CÒI BẰNG NHẠC CỦA BẠN:
+--------------------------------------------------------------------------------
+CÁCH 1: DÙNG GIAO DIỆN ĐỒ HỌA TRÊN TRÌNH DUYỆT (TIỆN LỢI NHẤT):
+1. Nhấp đúp chuột vào file: Audio_Studio.html (Mở bằng Chrome, Edge hoặc Cốc Cốc).
+   (Tất cả âm thanh mẫu đã được nhúng sẵn 100%, bạn có thể nghe thử ngay lập tức mà không cần mạng Internet).
+2. Chọn Slot muốn thay đổi (Slot 0 đến Slot 4).
+3. Bạn có 2 lựa chọn:
+   - Cách A: Bấm nút "✨ Chọn mẫu có sẵn" để mở Thư viện 9+ âm thanh độc quyền và chọn tiếng bạn thích.
+   - Cách B: Bấm nút "📁 Đổi bằng file MP3/WAV" để nạp bài hát hoặc đoạn âm thanh riêng của bạn.
+4. Kéo thanh chọn trên sóng âm để cắt đoạn ưng ý, hoặc bấm nút "✂️ Tự động cắt khoảng lặng" và "🔊 Kích to tối đa (Peak 98%)".
+5. Bấm nút "📦 Xuất sound_bank.bin".
+6. Cắm cáp sạc USB Type-C từ mạch còi xe vào cổng USB máy tính.
+7. Nhấp đúp chuột vào file: nap_tieng_coi.bat -> File sẽ tự động nạp vào còi xe trong 3 giây!
+
+CÁCH 2: DÀNH CHO NGƯỜI THÍCH 1-CLICK TỰ ĐỘNG:
+1. Chuẩn bị file âm thanh đuôi .wav và đặt tên theo slot bạn muốn:
+   - slot0.wav  (Thay cho Slot 0)
+   - slot1.wav  (Thay cho Slot 1)
+   - slot2.wav  (Thay cho Slot 2)
+   - slot3.wav  (Thay cho Slot 3)
+   - slot4.wav  (Thay cho Slot 4)
+2. Copy các file này vào thư mục: sounds_input/
+3. Cắm cáp USB Type-C nối còi xe với máy tính.
+4. Nhấp đúp chuột vào file: nap_tieng_coi.bat
+5. Phần mềm sẽ tự động chuẩn hóa âm lượng, đóng gói và nạp vào còi xe!
+
+Chúc bạn có những trải nghiệm tuyệt vời và thú vị với chiếc còi xe của mình!
+================================================================================

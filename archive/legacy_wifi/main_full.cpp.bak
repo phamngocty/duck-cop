@@ -1,0 +1,164 @@
+/**
+ * ============================================================================
+ * DỰ ÁN: CÒI XE ESP32-C3 SUPER MINI (INSTANT SOUND FX & WIFI WEB PORTAL)
+ * Tác giả: Tỷ (TỰ LÀM ĐIỆN TỬ)
+ * Vi điều khiển: ESP32-C3 Super Mini (RISC-V 160MHz, Flash 4MB)
+ * Mạch công suất: PAM8403 (Amply Stereo 2x3W Class-D)
+ * Chân xuất âm thanh: GPIO3 (Qua mạch lọc RC 1kΩ + 104 vào ngõ L/R của PAM8403)
+ * Nút cấu hình: Nút BOOT (GPIO9) tích hợp trên mạch
+ * Đèn báo trạng thái: LED Xanh (GPIO8) tích hợp trên mạch (Active LOW)
+ * ============================================================================
+ *
+ * CƠ CHẾ HOẠT ĐỘNG:
+ * 1. Chế độ còi bình thường (Normal Horn Mode):
+ *    - Khởi động tức thì < 3ms, TẮT HOÀN TOÀN WiFi & Bluetooth.
+ *    - Phát ngay âm thanh từ Flash LittleFS (hoặc âm thanh gốc duck.wav).
+ *
+ * 2. Chế độ cài đặt (Setting Mode qua WiFi):
+ *    - Giữ nút BOOT khi cấp nguồn / bật khóa xe.
+ *    - Kêu 2 tiếng "Bíp... Bíp" xác nhận + Nhấp nháy đèn LED.
+ *    - Phát WiFi Access Point: "COI-XE-ESP32" (Không cần mật khẩu).
+ *    - Điện thoại kết nối vào WiFi sẽ tự động mở trang Web Portal (192.168.4.1):
+ *      + Chọn file âm thanh bất kỳ từ điện thoại (MP3, WAV, M4A...).
+ *      + Phát thử trực tiếp ra loa xe ngay tại chỗ.
+ *      + Chỉnh âm lượng, tốc độ, lặp lại.
+ *      + Bấm Lưu -> Ghi vào LittleFS -> Tắt khóa xe rồi bật lại là còi chạy ngay!
+ */
+
+#include <Arduino.h>
+#include <Preferences.h>
+#include "audio_player.h"
+#include "web_portal.h"
+
+static bool is_setting_mode = false;
+static WebPortal webPortal;
+
+// Chuyển sang chế độ Cài đặt WiFi (Setting Mode)
+static void enterSettingMode() {
+    if (is_setting_mode) return;
+    is_setting_mode = true;
+    Serial.println("\n[SYSTEM] >>> ENTERING WIFI SETTING MODE <<<");
+
+    // Dừng phát âm thanh còi thông thường
+    AudioPlayer::instance().stop();
+
+    // Kêu 2 tiếng "Bíp... Bíp" vang rõ để xác nhận đã mở WiFi
+    AudioPlayer::instance().playBeep(1800, 90);
+    delay(100);
+    AudioPlayer::instance().playBeep(2400, 140);
+
+    // Bật nhấp nháy đèn LED và phát WiFi Access Point
+    webPortal.start();
+}
+
+// Xử lý nút bấm thông minh:
+// 1. Nhấn nhả nhanh (< 2s): Đổi tiếng còi tiếp theo trong Sound Bank (1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 1)
+// 2. Nhấn giữ lâu (>= 2.5s): Chuyển ngay sang chế độ WiFi Setting Mode mà không lo lỗi chip!
+static void checkSoundSwitchButton() {
+    static unsigned long press_start = 0;
+    static bool is_pressed = false;
+    static bool long_press_done = false;
+
+    bool btn_down = (digitalRead(BOOT_PIN) == LOW) || (digitalRead(EXT_BUTTON_PIN) == LOW);
+
+    if (btn_down) {
+        if (!is_pressed) {
+            is_pressed = true;
+            press_start = millis();
+            long_press_done = false;
+        } else {
+            // Kiểm tra nếu đang giữ nút đủ 2.5 giây -> Mở ngay WiFi Setting Mode!
+            if (!long_press_done && (millis() - press_start >= 2500)) {
+                long_press_done = true;
+                enterSettingMode();
+            }
+        }
+    } else {
+        if (is_pressed) {
+            unsigned long duration = millis() - press_start;
+            is_pressed = false;
+            // Nhấn nhả nhanh (từ 35ms đến 2000ms): Chuyển sang âm thanh tiếp theo!
+            if (!long_press_done && duration >= 35 && duration < 2000) {
+                AudioPlayer::instance().nextSlot();
+            }
+        }
+    }
+}
+
+void setup() {
+    Serial.begin(115200);
+    delay(50);
+    Serial.println("\n\n========================================");
+    Serial.println("  COI XE ESP32-C3 SUPER MINI STARTED   ");
+    Serial.println("========================================");
+
+    // Cấu hình chân đèn LED và nút bấm
+    pinMode(LED_PIN, OUTPUT);
+    pinMode(BOOT_PIN, INPUT_PULLUP);
+    pinMode(EXT_BUTTON_PIN, INPUT_PULLUP);
+
+    // Chớp đèn LED 3 lần để báo hiệu vi điều khiển đã khởi động thành công
+    for (int i = 0; i < 3; i++) {
+        digitalWrite(LED_PIN, LOW); // Sáng LED (Active LOW)
+        delay(70);
+        digitalWrite(LED_PIN, HIGH); // Tắt LED
+        delay(70);
+    }
+
+    // =========================================================================
+    // CƠ CHẾ: Giữ nút phụ GPIO1 khi bật nguồn (GPIO1 không phải strapping pin)
+    // =========================================================================
+    if (digitalRead(EXT_BUTTON_PIN) == LOW) {
+        unsigned long t0 = millis();
+        bool held = true;
+        while (millis() - t0 < 1500) {
+            if (digitalRead(EXT_BUTTON_PIN) == HIGH) {
+                held = false;
+                break;
+            }
+            delay(10);
+        }
+        if (held) {
+            is_setting_mode = true;
+            Serial.println("[BOOT] Triggered Setting Mode via GPIO1 on power up");
+        }
+    }
+
+    // Khởi tạo phần cứng âm thanh
+    AudioPlayer::instance().init();
+
+    if (is_setting_mode) {
+        Serial.println("[BOOT] Starting in WiFi Setting Mode...");
+        // Kêu 2 tiếng bíp xác nhận đã vào chế độ cài đặt WiFi
+        AudioPlayer::instance().playBeep(1800, 90);
+        delay(100);
+        AudioPlayer::instance().playBeep(2400, 140);
+
+        // Khởi động WiFi Access Point và Web Portal
+        webPortal.start();
+    } else {
+        Serial.println("[BOOT] Starting in Normal Horn Mode");
+        // Bắt đầu phát âm thanh ngay lập tức
+        AudioPlayer::instance().start();
+    }
+}
+
+void loop() {
+    if (is_setting_mode) {
+        // Xử lý các yêu cầu từ Web Portal điện thoại
+        webPortal.handle();
+
+        // Nhấp nháy đèn LED báo hiệu đang mở WiFi cài đặt
+        static unsigned long last_blink = 0;
+        if (millis() - last_blink >= 400) {
+            last_blink = millis();
+            digitalWrite(LED_PIN, !digitalRead(LED_PIN));
+        }
+        delay(2);
+    } else {
+        // Chế độ còi bình thường:
+        // Quét nút bấm (nhấn nhanh = đổi tiếng; giữ 2.5s = bật WiFi Setting Mode)
+        checkSoundSwitchButton();
+        delay(10);
+    }
+}
