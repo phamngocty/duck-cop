@@ -89,14 +89,34 @@ class AudioStudioHandler(BaseHTTPRequestHandler):
         query = parse_qs(parsed.query)
 
         if path in ["/", "/index.html"]:
-            if not os.path.exists(HTML_PATH):
-                self.send_error(404, "web_gui.html not found")
-                return
-            with open(HTML_PATH, "rb") as f:
+            target_html = HTML_PATH
+            if not os.path.exists(target_html):
+                alt_html = os.path.join(SCRIPT_DIR, "Audio_Studio.html")
+                if os.path.exists(alt_html):
+                    target_html = alt_html
+                else:
+                    self.send_error(404, "Audio_Studio.html not found")
+                    return
+            with open(target_html, "rb") as f:
                 content = f.read()
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", str(len(content)))
+            self.end_headers()
+            self.wfile.write(content)
+            return
+
+        elif path == "/esptool-bundle.js":
+            bundle_path = os.path.join(SCRIPT_DIR, "esptool-bundle.js")
+            if not os.path.exists(bundle_path):
+                self.send_error(404, "esptool-bundle.js not found")
+                return
+            with open(bundle_path, "rb") as f:
+                content = f.read()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/javascript; charset=utf-8")
+            self.send_header("Content-Length", str(len(content)))
+            self.send_header("Cache-Control", "no-cache")
             self.end_headers()
             self.wfile.write(content)
             return
@@ -134,7 +154,7 @@ class AudioStudioHandler(BaseHTTPRequestHandler):
 
         elif path == "/api/list_slots":
             slots_data = []
-            for i in range(5):
+            for i in range(20):
                 fpath, name = build_sound_bank.find_slot_file(i)
                 slots_data.append({
                     "slot": i,
@@ -158,8 +178,8 @@ class AudioStudioHandler(BaseHTTPRequestHandler):
                 data = json.loads(body.decode("utf-8"))
 
                 slot_idx = int(data.get("slot", 0))
-                if slot_idx < 0 or slot_idx >= 5:
-                    self._send_json_response(400, {"success": False, "error": "Slot index must be 0-4"})
+                if slot_idx < 0 or slot_idx >= 20:
+                    self._send_json_response(400, {"success": False, "error": "Slot index must be 0-19"})
                     return
 
                 pcm_data = data.get("pcm", [])

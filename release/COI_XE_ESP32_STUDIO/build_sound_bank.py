@@ -36,7 +36,7 @@ OUTPUT_BIN = os.path.join(SCRIPT_DIR, "sound_bank.bin")
 FLASH_OFFSET = "0x1E0000"
 MAGIC = 0x4B435544  # 'D','U','C','K' in little-endian
 VERSION = 1
-MAX_SLOTS = 5
+MAX_SLOTS = 20
 TARGET_SAMPLE_RATE = 16000
 ANTI_POP_PADDING_SAMPLES = 160  # 10ms of 0x80 (DC 128)
 
@@ -44,8 +44,7 @@ DEFAULT_SLOT_NAMES = [
     "Slot 0: Vit Coi Xe Chuan (Duck 2)",
     "Slot 1: Vit Keu Don (Duck 1)",
     "Slot 2: Vit Coi Doi (Double Quack)",
-    "Slot 3: Bo Rong (Cow Mooing)",
-    "Slot 4: Coi Canh Sat (Police Siren)"
+    "Slot 3: Bo Rong (Cow Mooing)"
 ]
 
 def load_wav_pcm(wav_path, target_rate=TARGET_SAMPLE_RATE, add_padding=True):
@@ -109,6 +108,7 @@ def load_wav_pcm(wav_path, target_rate=TARGET_SAMPLE_RATE, add_padding=True):
 
 def find_slot_file(slot_idx):
     """Tìm file cho slot: Ưu tiên sounds_input/slotX.* -> sounds_sample/slotX_*"""
+    def_name = DEFAULT_SLOT_NAMES[slot_idx] if slot_idx < len(DEFAULT_SLOT_NAMES) else f"Slot {slot_idx}"
     # 1. Tìm trong sounds_input
     for ext in ['.wav', '.WAV']:
         p = os.path.join(INPUT_DIR, f"slot{slot_idx}{ext}")
@@ -123,9 +123,9 @@ def find_slot_file(slot_idx):
     # 2. Dự phòng trong sounds_sample
     sample_matches = glob.glob(os.path.join(SAMPLE_DIR, f"slot{slot_idx}*.*"))
     if sample_matches:
-        return sample_matches[0], DEFAULT_SLOT_NAMES[slot_idx]
+        return sample_matches[0], def_name
 
-    return None, DEFAULT_SLOT_NAMES[slot_idx]
+    return None, def_name
 
 def build_sound_bank_binary(output_path=OUTPUT_BIN):
     """Tạo file sound_bank.bin chuẩn định dạng nhị phân Flash"""
@@ -133,14 +133,24 @@ def build_sound_bank_binary(output_path=OUTPUT_BIN):
     print("[*] DANG KHOI TAO GOI AM THANH SOUND_BANK.BIN CHO ESP32-C3")
     print("=" * 65)
 
-    header_buf = bytearray(512)
-    struct.pack_into('<IHH', header_buf, 0, MAGIC, VERSION, MAX_SLOTS)
+    import re
+    slot_indices = set(range(4))
+    for f in glob.glob(os.path.join(INPUT_DIR, "slot*.*")):
+        base = os.path.basename(f)
+        m = re.match(r'slot(\d+)', base, re.I)
+        if m:
+            slot_indices.add(int(m.group(1)))
 
-    curr_offset = 512
+    num_slots = min(MAX_SLOTS, max(slot_indices) + 1 if slot_indices else 4)
+    header_size = 512 if num_slots <= 11 else 1024
+    header_buf = bytearray(header_size)
+    struct.pack_into('<IHH', header_buf, 0, MAGIC, VERSION, num_slots)
+
+    curr_offset = header_size
     pcm_chunks = []
     slot_info_list = []
 
-    for idx in range(MAX_SLOTS):
+    for idx in range(num_slots):
         file_path, display_name = find_slot_file(idx)
         if file_path and os.path.exists(file_path):
             try:

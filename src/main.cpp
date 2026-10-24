@@ -6,14 +6,13 @@
  * - ĐẶC TÍNH:
  *   + 0% WiFi, 0% WebServer, 0% LwIP -> Không bao giờ bị sụt áp, không bị trễ boot!
  *   + Phát to rõ cực đại ngay microsecond đầu tiên khi vừa bật chìa khóa xe / xi nhan!
- *   + Hỗ trợ 5 Slot âm thanh mặc định trong PROGMEM + Tự động nạp Custom Sound Bank
+ *   + Hỗ trợ 4 Slot âm thanh mặc định trong PROGMEM + Tự động nạp Custom Sound Bank
  *     từ phân vùng Flash 0x1E0000 nếu khách hàng đã nạp gói âm thanh qua Tool.
  *
  *   Slot 0: Vịt Còi Xe Chuẩn (Duck 2)
  *   Slot 1: Vịt Kêu Đơn (Duck 1 - Quạc đanh giòn, cực to)
  *   Slot 2: Vịt Còi Đôi (Double Quack)
  *   Slot 3: Bò Rống (Cow Mooing)
- *   Slot 4: Còi Cảnh Sát (Police Siren)
  *
  * - CÁCH ĐỔI TIẾNG TRÊN XE (Không cần tháo dàn áo, không cần mở điện thoại):
  *   + Nối dây từ chân GPIO1 (hoặc nút BOOT GPIO9) ra nút bấm phụ trên tay lái xe.
@@ -42,7 +41,7 @@
 
 // Cấu trúc gói âm thanh Custom Sound Bank nạp vào Flash
 #define SOUND_BANK_MAGIC      0x4B435544  // 'D','U','C','K' in little-endian
-#define SOUND_BANK_MAX_SLOTS  5
+#define SOUND_BANK_MAX_SLOTS  20          // Hỗ trợ mở rộng tối đa lên đến 20 Slot âm thanh
 
 struct SoundSlotMeta {
     uint32_t offset;       // Byte offset tính từ đầu phân vùng Flash
@@ -55,7 +54,7 @@ struct SoundSlotMeta {
 struct SoundBankHeader {
     uint32_t magic;        // 0x4B435544
     uint16_t version;      // Phiên bản = 1
-    uint16_t slot_count;   // Số lượng slot (tối đa 5)
+    uint16_t slot_count;   // Số lượng slot thực tế
     SoundSlotMeta slots[SOUND_BANK_MAX_SLOTS];
 };
 
@@ -65,8 +64,9 @@ struct ActiveSound {
     uint32_t sample_rate;
 };
 
-// Mảng 5 âm thanh hiện hành
+// Mảng âm thanh hiện hành
 static ActiveSound active_sounds[SOUND_BANK_MAX_SLOTS];
+static uint8_t total_active_slots = 4; // Số slot thực tế đang dùng (Mặc định 4)
 
 // Lưu slot vào RTC Slow Memory để đọc tức thì 0 microsecond lúc khởi động
 RTC_DATA_ATTR uint8_t rtc_saved_slot = 0;
@@ -113,7 +113,7 @@ void IRAM_ATTR onSampleTimer() {
 
 // Cấu hình slot âm thanh
 static void applySlot(uint8_t slot) {
-    if (slot >= SOUND_BANK_MAX_SLOTS) slot = 0;
+    if (slot >= total_active_slots) slot = 0;
     current_slot = slot;
     rtc_saved_slot = slot;
     rtc_valid = true;
@@ -125,7 +125,7 @@ static void applySlot(uint8_t slot) {
 
 // Chuyển sang tiếng tiếp theo khi nhấn nút trên tay lái
 static void switchNextSound() {
-    uint8_t next = (current_slot + 1) % SOUND_BANK_MAX_SLOTS;
+    uint8_t next = (current_slot + 1) % total_active_slots;
     
     // Tạm dừng timer
     sample_idx = 0;
@@ -184,11 +184,15 @@ static void checkButton() {
 
 // Khởi tạo danh sách âm thanh (Ưu tiên Flash Custom Sound Bank -> Dự phòng PROGMEM)
 static void initSoundBank() {
-    // 1. Nạp 5 âm thanh mặc định sẵn có trong mã nguồn
-    for (int i = 0; i < SOUND_BANK_MAX_SLOTS; i++) {
+    total_active_slots = 4;
+    // 1. Nạp 4 âm thanh mặc định sẵn có trong mã nguồn PROGMEM
+    for (int i = 0; i < 4; i++) {
         active_sounds[i].pcm_data = PRELOADED_SOUNDS[i].pcm_data;
         active_sounds[i].length = PRELOADED_SOUNDS[i].length;
         active_sounds[i].sample_rate = PRELOADED_SOUNDS[i].sample_rate;
+    }
+    for (int i = 4; i < SOUND_BANK_MAX_SLOTS; i++) {
+        active_sounds[i] = active_sounds[0];
     }
 
     // 2. Kiểm tra xem khách hàng có nạp gói âm thanh Custom qua Tool vào Flash 0x1E0000 không
@@ -200,11 +204,16 @@ static void initSoundBank() {
         if (esp_partition_mmap(part, 0, part->size, SPI_FLASH_MMAP_DATA, &mapped_data, &mmap_handle) == ESP_OK) {
             const SoundBankHeader *bank = (const SoundBankHeader*)mapped_data;
             if (bank->magic == SOUND_BANK_MAGIC && bank->version == 1) {
-                for (int i = 0; i < SOUND_BANK_MAX_SLOTS && i < bank->slot_count; i++) {
-                    if (bank->slots[i].length > 0 && (bank->slots[i].offset + bank->slots[i].length) <= part->size) {
-                        active_sounds[i].pcm_data = ((const uint8_t*)mapped_data) + bank->slots[i].offset;
-                        active_sounds[i].length = bank->slots[i].length;
-                        active_sounds[i].sample_rate = bank->slots[i].sample_rate;
+                uint8_t count = bank->slot_count;
+                if (count > SOUND_BANK_MAX_SLOTS) count = SOUND_BANK_MAX_SLOTS;
+                if (count > 0) {
+                    total_active_slots = count;
+                    for (int i = 0; i < count; i++) {
+                        if (bank->slots[i].length > 0 && (bank->slots[i].offset + bank->slots[i].length) <= part->size) {
+                            active_sounds[i].pcm_data = ((const uint8_t*)mapped_data) + bank->slots[i].offset;
+                            active_sounds[i].length = bank->slots[i].length;
+                            active_sounds[i].sample_rate = bank->slots[i].sample_rate;
+                        }
                     }
                 }
             }
@@ -228,7 +237,7 @@ void setup() {
 
     // 3. Nạp slot âm thanh: Ưu tiên đọc từ RTC SRAM (0 microsecond, không tốn thời gian đọc Flash)
     uint8_t slot_to_play = 0;
-    if (rtc_valid && rtc_saved_slot < SOUND_BANK_MAX_SLOTS) {
+    if (rtc_valid && rtc_saved_slot < total_active_slots) {
         slot_to_play = rtc_saved_slot;
     } else {
         // Cold boot lần đầu tiên: Đọc nhanh từ NVS
@@ -237,7 +246,7 @@ void setup() {
             slot_to_play = prefs.getUChar("slot", 0);
             prefs.end();
         }
-        if (slot_to_play >= SOUND_BANK_MAX_SLOTS) slot_to_play = 0;
+        if (slot_to_play >= total_active_slots) slot_to_play = 0;
     }
     applySlot(slot_to_play);
 

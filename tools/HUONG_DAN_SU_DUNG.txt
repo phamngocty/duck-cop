@@ -35,29 +35,24 @@ III. DANH SÁCH BỘ SƯU TẬP ÂM MẪU SẴN CÓ TRONG AUDIO STUDIO (9+ TIẾ
 
 IV. HƯỚNG DẪN TỰ ĐỔI TIẾNG CÒI BẰNG NHẠC CỦA BẠN:
 --------------------------------------------------------------------------------
-CÁCH 1: DÙNG GIAO DIỆN ĐỒ HỌA TRÊN TRÌNH DUYỆT (TIỆN LỢI NHẤT):
-1. Nhấp đúp chuột vào file: Audio_Studio.html (Mở bằng Chrome, Edge hoặc Cốc Cốc).
-   (Tất cả âm thanh mẫu đã được nhúng sẵn 100%, bạn có thể nghe thử ngay lập tức mà không cần mạng Internet).
-2. Chọn Slot muốn thay đổi (Slot 0 đến Slot 4).
-3. Bạn có 2 lựa chọn:
-   - Cách A: Bấm nút "✨ Chọn mẫu có sẵn" để mở Thư viện 9+ âm thanh độc quyền và chọn tiếng bạn thích.
-   - Cách B: Bấm nút "📁 Đổi bằng file MP3/WAV" để nạp bài hát hoặc đoạn âm thanh riêng của bạn.
-4. Kéo thanh chọn trên sóng âm để cắt đoạn ưng ý, hoặc bấm nút "✂️ Tự động cắt khoảng lặng" và "🔊 Kích to tối đa (Peak 98%)".
-5. Bấm nút "📦 Xuất sound_bank.bin".
-6. Cắm cáp sạc USB Type-C từ mạch còi xe vào cổng USB máy tính.
-7. Nhấp đúp chuột vào file: nap_tieng_coi.bat -> File sẽ tự động nạp vào còi xe trong 3 giây!
+CÁCH 1: NẠP TRỰC TIẾP 1-CLICK TRÊN WEB (TIỆN LỢI NHẤT - KHÔNG CẦN TẢI FILE BIN):
+1. Nhấp đúp chuột vào file: nap_tieng_coi.bat
+   -> Máy tính sẽ tự động bật máy chủ local tại http://localhost:8765 và mở trình duyệt Chrome/Edge.
+2. Chọn Slot muốn thay đổi (Slot 0 đến Slot 4):
+   - Chọn mẫu có sẵn trong Thư viện 9+ tiếng độc quyền hoặc bấm "Đổi bằng file MP3/WAV" bài hát của bạn.
+   - Kéo thanh âm lượng (100% - 250%) hoặc cắt đoạn sóng âm ưng ý.
+3. Cắm cáp USB Type-C từ còi xe vào máy tính.
+4. Bấm nút "⚡ Nạp Còi Xe (Web Serial)" ở góc trên bên phải -> Chọn cổng COM của còi xe -> Xong trong 3 giây!
+   (Web Serial nạp trực tiếp vào phân vùng 0x1E0000 trong nháy mắt, còi tự khởi động lại và nhận âm thanh mới).
 
-CÁCH 2: DÀNH CHO NGƯỜI THÍCH 1-CLICK TỰ ĐỘNG:
-1. Chuẩn bị file âm thanh đuôi .wav và đặt tên theo slot bạn muốn:
-   - slot0.wav  (Thay cho Slot 0)
-   - slot1.wav  (Thay cho Slot 1)
-   - slot2.wav  (Thay cho Slot 2)
-   - slot3.wav  (Thay cho Slot 3)
-   - slot4.wav  (Thay cho Slot 4)
-2. Copy các file này vào thư mục: sounds_input/
-3. Cắm cáp USB Type-C nối còi xe với máy tính.
-4. Nhấp đúp chuột vào file: nap_tieng_coi.bat
-5. Phần mềm sẽ tự động chuẩn hóa âm lượng, đóng gói và nạp vào còi xe!
+CÁCH 2: NẠP ONLINE QUA GITHUB PAGES (DÀNH CHO MỌI THIẾT BỊ KHÔNG CẦN CÀI ĐẶT):
+1. Truy cập trực tiếp trang web Audio Studio qua đường dẫn GitHub Pages (HTTPS).
+   (Hỗ trợ cả máy tính lẫn điện thoại Android cắm cáp OTG Type-C vào còi xe).
+2. Tùy chỉnh âm thanh và bấm "⚡ Nạp Còi Xe (Web Serial)" để nạp trực tiếp qua cổng COM.
+
+CÁCH 3: NẠP TRUYỀN THỐNG (OFFLINE HOẶC TRÌNH DUYỆT KHÔNG CÓ WEB SERIAL):
+1. Trên giao diện Studio, bấm "📦 Xuất sound_bank.bin".
+2. Cắm cáp USB và chạy file nạp cũ hoặc dùng thư mục sounds_input/.
 
 Chúc bạn có những trải nghiệm tuyệt vời và thú vị với chiếc còi xe của mình!
 ================================================================================

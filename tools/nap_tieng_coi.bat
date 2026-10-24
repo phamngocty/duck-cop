@@ -1,67 +1,41 @@
 @echo off
 chcp 65001 >nul
-title Nạp Tiếng Còi Xe ESP32-C3 - Speed FX Standalone
+title ESP32-C3 Speed FX Audio Studio - Nap Tieng Coi Xe Truc Tiep
 color 0b
 
 echo =================================================================
-echo   🦆 CÔNG CỤ NẠP ÂM THANH CÒI XE ESP32-C3 (1-CLICK NẠP NHANH)
-echo   Tương thích: Flash 0x1E0000 ^| 0%% WiFi ^| Khởi động tức thì
-echo   Bản quyền: Tự Làm Điện Tử
+echo   ESP32-C3 SPEED FX AUDIO STUDIO - NAP COI XE TRUC TIEP
+echo   Tu Lam Dien Tu - Flash 0x1E0000 - Web Serial 1-Click
 echo =================================================================
 echo.
-
-:: 1. Tự động kiểm tra file sound_bank.bin mới xuất từ trình duyệt trong Downloads
-set "DL_BIN=%USERPROFILE%\Downloads\sound_bank.bin"
-if exist "%DL_BIN%" (
-    echo [*] Phat hien file sound_bank.bin moi tu Audio Studio trong Downloads!
-    echo     Dang cap nhat vao thu muc...
-    copy /y "%DL_BIN%" "%~dp0sound_bank.bin" >nul
-    del "%DL_BIN%" >nul
-    echo [+] Da cap nhat goi am thanh moi nhat!
-    echo.
-)
-
-:: 2. Đảm bảo có thư mục sounds_input
-if not exist "%~dp0sounds_input" mkdir "%~dp0sounds_input"
-
-:: 3. Kiểm tra file sound_bank.bin
-if not exist "%~dp0sound_bank.bin" (
-    echo [*] Chua co sound_bank.bin, dang tu dong dong goi...
-    if exist "%~dp0build_sound_bank.py" (
-        python "%~dp0build_sound_bank.py" --build
-    )
-)
-
+echo [*] Dang khoi dong may chu Web Studio tai http://localhost:8765 ...
+echo [*] Trinh duyet web se tu dong mo trong giay lat.
 echo.
 echo =================================================================
-echo   ĐANG KẾT NỐI VÀ NẠP VÀO CÒI XE QUA CỔNG USB TYPE-C...
-echo   (Vui lòng cắm cáp USB nối còi xe với máy tính)
+echo   HUONG DAN NAP TREN WEB:
+echo   1. Chon tieng, chinh am luong va cat doan song am ung y.
+echo   2. Cam cap USB Type-C tu coi xe vao may tinh.
+echo   3. Bam nut [Nap Coi Xe (Web Serial)] tren thanh cong cu web.
+echo   4. Chon cong COM cua coi xe va cho nap trong 3 giay!
 echo =================================================================
 echo.
-
-:: 4. Ưu tiên nạp bằng esptool.exe độc lập (Không cần cài đặt Python)
-if exist "%~dp0esptool.exe" (
-    "%~dp0esptool.exe" --chip esp32c3 --baud 460800 write_flash 0x1E0000 "%~dp0sound_bank.bin"
-) else (
-    python "%~dp0build_sound_bank.py" --flash
-)
-
-if %errorlevel% equ 0 (
-    echo.
-    echo =================================================================
-    echo   🎉 NẠP THÀNH CÔNG 100%! 
-    echo   Bạn có thể rút cáp USB, bật khóa xe và bấm còi trải nghiệm ngay!
-    echo =================================================================
-) else (
-    echo.
-    echo =================================================================
-    echo   [-] Nạp thất bại!
-    echo   Gợi ý khắc phục:
-    echo   1. Đảm bảo cáp USB Type-C cắm chắc chắn và có truyền dữ liệu.
-    echo   2. Thử đổi sang cổng USB khác trên máy tính.
-    echo =================================================================
-)
-
+echo [*] Giu cua so nay mo trong khi dung Web. Nhan Ctrl+C de dong.
 echo.
-echo Nhấn phím bất kỳ để thoát...
-pause >nul
+
+where python >nul 2>nul
+if %errorlevel% neq 0 goto :NO_PYTHON
+
+python "%~dp0convert_audio.py"
+goto :EOF
+
+:NO_PYTHON
+echo [!] May tinh chua cai dat Python de chay may chu local.
+echo [*] Dang mo truc tiep giao dien Web Studio bang trinh duyet...
+start "" "%~dp0Audio_Studio.html"
+echo.
+echo [!] LUU Y TRINH DUYET:
+echo     Neu mo truc tiep tu file, Chrome/Edge co the chan mo cong COM.
+echo     Ban co the mo ban Online qua GitHub Pages HTTPS de nap 1-click
+echo     hoac cai dat Python de chay may chu local http://localhost:8765.
+echo.
+pause
