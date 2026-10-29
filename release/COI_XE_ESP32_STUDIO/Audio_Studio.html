@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>ESP32-C3 Speed FX Audio Studio - Quản Lý Âm Thanh Còi Xe</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -422,6 +422,9 @@
       height: 240px;
       background: #030710;
       overflow: hidden;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     canvas {
@@ -1301,6 +1304,409 @@
       color: var(--text-muted);
       font-family: 'JetBrains Mono', monospace;
     }
+  
+    /* ========================================================
+       TỐI ƯU GIAO DIỆN DI ĐỘNG & ANDROID (MOBILE OPTIMIZATIONS)
+       ======================================================== */
+    @media (max-width: 768px) {
+      body {
+        padding-bottom: 70px;
+      }
+
+      header {
+        padding: 10px 14px;
+        gap: 10px;
+      }
+
+      .brand {
+        gap: 10px;
+      }
+
+      .brand-icon {
+        font-size: 26px;
+      }
+
+      .brand h1 {
+        font-size: 15px;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .badge {
+        font-size: 10px;
+        padding: 2px 7px;
+      }
+
+      .badge-sub {
+        font-size: 10px;
+        padding: 2px 6px;
+      }
+
+      .header-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        align-items: stretch;
+      }
+
+      .header-actions .badge-sub {
+        grid-column: span 2;
+        text-align: center;
+        padding: 4px;
+      }
+
+      .btn-action {
+        width: 100%;
+        padding: 10px 8px;
+        font-size: 12px;
+        justify-content: center;
+        min-height: 42px;
+      }
+
+      .btn-action.btn-flash {
+        grid-column: span 2;
+        font-size: 13px;
+        padding: 11px;
+      }
+
+      main {
+        margin: 12px auto 0;
+        padding: 0 10px;
+        gap: 14px;
+      }
+
+      /* Thước đo Flash */
+      .flash-meter-card {
+        padding: 12px 14px;
+        gap: 8px;
+      }
+
+      .flash-meter-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+
+      .flash-meter-title {
+        font-size: 12px;
+      }
+
+      .flash-meter-stats {
+        width: 100%;
+        justify-content: space-between;
+        font-size: 11px;
+      }
+
+      .flash-meter-slots {
+        gap: 5px;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .flash-slot-pill {
+        font-size: 10px;
+        padding: 2px 6px;
+      }
+
+      /* 5 Slot Tabs trên mobile: 2 cột gọn gàng */
+      .slots-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+
+      .slot-tab {
+        padding: 10px 12px;
+        min-height: 70px;
+        gap: 4px;
+      }
+
+      .slot-name {
+        font-size: 12px;
+      }
+
+      .slot-detail {
+        font-size: 10px;
+      }
+
+      .slot-add-card {
+        min-height: 70px;
+        padding: 10px;
+        font-size: 12px;
+      }
+
+      /* Editor Topbar */
+      .editor-card {
+        border-radius: 14px;
+      }
+
+      .editor-topbar {
+        padding: 10px 12px;
+        gap: 10px;
+      }
+
+      .editor-slot-label {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .slot-title-input {
+        width: 100%;
+        flex: 1 1 100%;
+        font-size: 13px;
+        padding: 7px 10px;
+        margin: 2px 0;
+      }
+
+      .btn-slot-action {
+        flex: 1;
+        justify-content: center;
+        padding: 7px 10px;
+        font-size: 12px;
+      }
+
+      .editor-tools {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+      }
+
+      .btn-tool {
+        width: 100%;
+        justify-content: center;
+        padding: 8px 6px;
+        font-size: 11px;
+        min-height: 38px;
+      }
+
+      /* Canvas sóng âm trên mobile: giảm chiều cao cho vừa màn hình */
+      .canvas-container {
+        height: 165px;
+        touch-action: none;
+      }
+
+      .trim-handle {
+        width: 44px; /* Hitbox lớn hơn cho ngón tay chạm */
+      }
+
+      .trim-handle-left {
+        right: -22px;
+      }
+
+      .trim-handle-right {
+        left: -22px;
+      }
+
+      .trim-handle-badge {
+        font-size: 9px;
+        padding: 2px 5px;
+        top: 6px;
+      }
+
+      /* Thanh công cụ cắt âm */
+      .cutting-toolbar {
+        padding: 10px 12px;
+        gap: 8px;
+      }
+
+      .cutting-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+      }
+
+      .cutting-actions {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+        width: 100%;
+      }
+
+      .btn-cut {
+        width: 100%;
+        justify-content: center;
+        padding: 8px 6px;
+        font-size: 11px;
+        min-height: 38px;
+        text-align: center;
+      }
+
+      .trim-inputs-group {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        background: rgba(12, 32, 61, 0.5);
+        padding: 8px 10px;
+        border-radius: 8px;
+        box-sizing: border-box;
+      }
+
+      .trim-input-item {
+        justify-content: center;
+      }
+
+      .btn-step {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+      }
+
+      .trim-number-input {
+        width: 50px;
+        height: 32px;
+        font-size: 12px;
+      }
+
+      /* Điều khiển phát & Âm lượng */
+      .editor-controls {
+        padding: 12px 14px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+
+      .playback-group {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .btn-play {
+        width: 48px;
+        height: 48px;
+        font-size: 22px;
+        flex-shrink: 0;
+      }
+
+      .time-box {
+        flex: 1;
+        justify-content: center;
+        font-size: 12px;
+        padding: 8px 10px;
+      }
+
+      .volume-group {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px;
+      }
+
+      .vol-slider {
+        flex: 1;
+        margin: 0 10px;
+      }
+
+      .speed-group {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .btn-speed {
+        flex: 1;
+        text-align: center;
+        padding: 8px 6px;
+        font-size: 12px;
+        min-height: 36px;
+      }
+
+      /* Modal tối ưu mobile */
+      .modal-backdrop {
+        padding: 10px;
+      }
+
+      .modal-card {
+        max-height: 92vh;
+        border-radius: 16px;
+      }
+
+      .modal-header {
+        padding: 14px 16px;
+      }
+
+      .modal-title {
+        font-size: 15px;
+      }
+
+      .modal-body {
+        padding: 14px 16px;
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .flash-info-row {
+        grid-template-columns: 1fr;
+      }
+
+      .flash-terminal {
+        height: 140px;
+        font-size: 11px;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .info-card {
+        padding: 14px 16px;
+      }
+
+      .info-title {
+        font-size: 14px;
+      }
+
+      .info-list {
+        font-size: 12px;
+      }
+
+      .toast {
+        left: 14px;
+        right: 14px;
+        bottom: 14px;
+        justify-content: center;
+        text-align: center;
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .brand h1 {
+        font-size: 14px;
+      }
+
+      .header-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .header-actions .badge-sub {
+        grid-column: span 1;
+      }
+
+      .btn-action.btn-flash {
+        grid-column: span 1;
+      }
+
+      .slots-container {
+        grid-template-columns: 1fr;
+      }
+
+      .cutting-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .editor-tools {
+        grid-template-columns: 1fr;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -1627,10 +2033,10 @@
 
     // Cấu trúc 4 Slot chính của thiết bị
     const slots = [
-      { name: "Vit Coi Xe Chuan (Duck 2)", pcm: null, sampleRate: 16000, buffer: null, originalBuffer: null, trimStart: 0, trimEnd: 0, volume: 100 },
-      { name: "Vit Keu Don (Duck 1)", pcm: null, sampleRate: 16000, buffer: null, originalBuffer: null, trimStart: 0, trimEnd: 0, volume: 100 },
-      { name: "Vit Coi Doi (Double Quack)", pcm: null, sampleRate: 16000, buffer: null, originalBuffer: null, trimStart: 0, trimEnd: 0, volume: 100 },
-      { name: "Bo Rong (Cow Mooing)", pcm: null, sampleRate: 16000, buffer: null, originalBuffer: null, trimStart: 0, trimEnd: 0, volume: 100 }
+      { name: "Vit Coi Xe Chuan (Duck 2)", pcm: null, sampleRate: 22050, buffer: null, originalBuffer: null, trimStart: 0, trimEnd: 0, volume: 100 },
+      { name: "Vit Keu Don (Duck 1)", pcm: null, sampleRate: 22050, buffer: null, originalBuffer: null, trimStart: 0, trimEnd: 0, volume: 100 },
+      { name: "Vit Coi Doi (Double Quack)", pcm: null, sampleRate: 22050, buffer: null, originalBuffer: null, trimStart: 0, trimEnd: 0, volume: 100 },
+      { name: "Bo Rong (Cow Mooing)", pcm: null, sampleRate: 22050, buffer: null, originalBuffer: null, trimStart: 0, trimEnd: 0, volume: 100 }
     ];
 
     let currentSlotIdx = 0;
@@ -1772,7 +2178,7 @@
       const newSlot = {
         name: `Slot ${newIdx}: ${presetName}`,
         pcm: null,
-        sampleRate: 16000,
+        sampleRate: 22050,
         buffer: null,
         originalBuffer: null,
         trimStart: 0,
@@ -1792,7 +2198,7 @@
             newSlot.originalBuffer = buf;
             newSlot.trimStart = 0;
             newSlot.trimEnd = buf.duration;
-            newSlot.pcm = bufferToPCM8(buf);
+            ensureSlotPCM(newIdx);
             if (currentSlotIdx === newIdx) {
               selectSlot(newIdx);
             }
@@ -1887,7 +2293,7 @@
             slots[i].trimStart = 0;
             slots[i].trimEnd = buf.duration;
             slots[i].volume = 100;
-            slots[i].pcm = bufferToPCM8(buf);
+            ensureSlotPCM(i);
           } catch (e) {
             console.error("Lỗi giải mã audio slot " + i, e);
           }
@@ -2073,10 +2479,11 @@
     }
 
     const canvasEl = document.getElementById('canvasContainer');
-    canvasEl.addEventListener('mousedown', (e) => {
+
+    function handleTrimStart(clientX) {
       if (!currentBuffer) return;
       const rect = canvasEl.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
+      const clickX = clientX - rect.left;
       const pct = Math.max(0, Math.min(1, clickX / rect.width));
       const dur = currentBuffer.duration;
       const clickTime = pct * dur;
@@ -2084,23 +2491,26 @@
       const startX = (trimStart / dur) * rect.width;
       const endX = (trimEnd / dur) * rect.width;
 
-      // 1. Kiểm tra nếu bấm gần tay cầm nào (bán kính 24px)
-      if (Math.abs(clickX - startX) <= 24) {
+      // Hitbox lớn hơn cho ngón tay trên màn hình cảm ứng di động (36px)
+      const hitRadius = ('ontouchstart' in window || navigator.maxTouchPoints > 0) ? 36 : 24;
+
+      // 1. Kiểm tra nếu chạm gần tay cầm nào
+      if (Math.abs(clickX - startX) <= hitRadius) {
         isDraggingTrim = 'left';
-      } else if (Math.abs(clickX - endX) <= 24) {
+      } else if (Math.abs(clickX - endX) <= hitRadius) {
         isDraggingTrim = 'right';
       }
-      // 2. Nếu bấm ra ngoài vùng chọn (vùng dimmer trái - đoạn đầu)
+      // 2. Nếu chạm ra ngoài vùng chọn (vùng dimmer trái - đoạn đầu)
       else if (clickX < startX) {
         trimStart = Math.min(clickTime, trimEnd - 0.05);
         isDraggingTrim = 'left';
       }
-      // 3. Nếu bấm ra ngoài vùng chọn (vùng dimmer phải - đoạn đuôi)
+      // 3. Nếu chạm ra ngoài vùng chọn (vùng dimmer phải - đoạn đuôi)
       else if (clickX > endX) {
         trimEnd = Math.max(clickTime, trimStart + 0.05);
         isDraggingTrim = 'right';
       }
-      // 4. Nếu bấm vào giữa vùng chọn: tự động bắt mốc gần nhất
+      // 4. Nếu chạm vào giữa vùng chọn: tự động bắt mốc gần nhất
       else {
         const distToStart = Math.abs(clickX - startX);
         const distToEnd = Math.abs(clickX - endX);
@@ -2117,12 +2527,12 @@
       updateTrimDimmer();
       updateTimeDisplay();
       updateTrimInputs();
-    });
+    }
 
-    window.addEventListener('mousemove', (e) => {
+    function handleTrimMove(clientX) {
       if (!isDraggingTrim || !currentBuffer) return;
       const rect = canvasEl.getBoundingClientRect();
-      const clickX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+      const clickX = Math.max(0, Math.min(rect.width, clientX - rect.left));
       const pct = clickX / rect.width;
       const time = pct * currentBuffer.duration;
 
@@ -2136,16 +2546,51 @@
       updateTrimDimmer();
       updateTimeDisplay();
       updateTrimInputs();
-    });
+    }
 
-    window.addEventListener('mouseup', () => {
+    function handleTrimEnd() {
       if (isDraggingTrim) {
         isDraggingTrim = null;
         recalculatePCM();
         updateTrimInputs();
         updateFlashUsageUI();
       }
+    }
+
+    // Sự kiện chuột (PC / Laptop)
+    canvasEl.addEventListener('mousedown', (e) => {
+      handleTrimStart(e.clientX);
     });
+    window.addEventListener('mousemove', (e) => {
+      handleTrimMove(e.clientX);
+    });
+    window.addEventListener('mouseup', handleTrimEnd);
+
+    // Sự kiện cảm ứng vuốt chạm (Android / Smartphone)
+    canvasEl.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches.length > 0) {
+        e.preventDefault(); // Ngăn trình duyệt cuộn trang khi vuốt sóng âm
+        handleTrimStart(e.touches[0].clientX);
+      }
+    }, { passive: false });
+
+    window.addEventListener('touchmove', (e) => {
+      if (isDraggingTrim && e.touches && e.touches.length > 0) {
+        e.preventDefault(); // Ngăn giật trượt màn hình khi đang kéo mốc
+        handleTrimMove(e.touches[0].clientX);
+      }
+    }, { passive: false });
+
+    window.addEventListener('touchend', handleTrimEnd);
+    window.addEventListener('touchcancel', handleTrimEnd);
+
+    // Mở khóa AudioContext cho Android trên lần chạm đầu tiên
+    document.addEventListener('touchstart', function unlockAudioContext() {
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      document.removeEventListener('touchstart', unlockAudioContext);
+    }, { once: true });
 
     // === CÔNG CỤ CẮT ÂM THANH CƠ BẢN (BASIC AUDIO CUTTING TOOLS) ===
 
@@ -2883,11 +3328,11 @@
       const endSample = Math.floor(trimEnd * rate);
       const numSamples = Math.max(1, endSample - startSample);
 
-      const targetRate = 16000;
+      const targetRate = 22050;
       const targetLen = Math.floor(numSamples * (targetRate / rate));
-      const pcm = new Uint8Array(160 + targetLen);
+      const pcm = new Uint8Array(220 + targetLen);
 
-      pcm.fill(128, 0, 160); // 10ms đệm 0x80 chống bụp loa
+      pcm.fill(128, 0, 220); // 10ms đệm 0x80 chống bụp loa ở 22050Hz
 
       // Nhân hệ số Volume đã chỉnh
       const volFactor = (slots[currentSlotIdx].volume || 100) / 100.0;
@@ -2897,7 +3342,7 @@
         const srcIdx = startSample + Math.floor(i * ratio);
         const s = ch[Math.min(srcIdx, ch.length - 1)] * volFactor;
         // Chặn cận mềm [0, 255]
-        pcm[160 + i] = Math.max(0, Math.min(255, Math.round((s * 127) + 128)));
+        pcm[220 + i] = Math.max(0, Math.min(255, Math.round((s * 127) + 128)));
       }
 
       slots[currentSlotIdx].pcm = pcm;
@@ -3014,10 +3459,10 @@
       const endSample = Math.floor((s.trimEnd || s.buffer.duration) * rate);
       const numSamples = Math.max(1, endSample - startSample);
 
-      const targetRate = 16000;
+      const targetRate = 22050;
       const targetLen = Math.floor(numSamples * (targetRate / rate));
-      const pcm = new Uint8Array(160 + targetLen);
-      pcm.fill(128, 0, 160); // 10ms DC 128 chống bụp loa
+      const pcm = new Uint8Array(220 + targetLen);
+      pcm.fill(128, 0, 220); // 10ms DC 128 chống bụp loa ở 22050Hz
 
       const volFactor = (s.volume || 100) / 100.0;
       const ratio = numSamples / targetLen;
@@ -3025,7 +3470,7 @@
       for (let i = 0; i < targetLen; i++) {
         const srcIdx = startSample + Math.floor(i * ratio);
         const val = ch[Math.min(srcIdx, ch.length - 1)] * volFactor;
-        pcm[160 + i] = Math.max(0, Math.min(255, Math.round((val * 127) + 128)));
+        pcm[220 + i] = Math.max(0, Math.min(255, Math.round((val * 127) + 128)));
       }
       s.pcm = pcm;
       s.sampleRate = targetRate;
@@ -3057,7 +3502,7 @@
 
         view.setUint32(slotHeadOffset, currOffset, true);
         view.setUint32(slotHeadOffset + 4, pcmLen, true);
-        view.setUint16(slotHeadOffset + 8, s.sampleRate || 16000, true);
+        view.setUint16(slotHeadOffset + 8, s.sampleRate || 22050, true);
         view.setUint16(slotHeadOffset + 10, 0, true);
 
         const nameBytes = new TextEncoder().encode((s.name || `Slot ${i}`).slice(0, 31));
@@ -3143,13 +3588,22 @@
       if (!('serial' in navigator)) {
         alertBox.className = 'flash-alert-box error';
         alertBox.style.display = 'block';
-        alertBox.innerHTML = `
-          <strong>⚠️ Trình duyệt chưa bật tính năng mở cổng COM (Web Serial)!</strong><br>
-          - Bạn đang mở trực tiếp file qua giao thức <code>file://</code> (cần mở qua <code>http://localhost:8765</code> để cấp quyền cổng COM).<br>
-          👉 <strong>Cách 1:</strong> Nhấp đúp file <code>nap_tieng_coi.bat</code> trong thư mục để tự động mở qua <code>http://localhost:8765</code>.<br>
-          👉 <strong>Cách 2:</strong> Mở bản Online tại GitHub Pages (HTTPS) để nạp 1-click không cần cài Python.<br>
-          👉 <strong>Cách 3:</strong> Bấm nút <code>📦 Xuất sound_bank.bin</code> ở trên để tải file và dùng nạp truyền thống.
-        `;
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (isMobile) {
+          alertBox.innerHTML = `
+            <strong>📱 Bạn đang thao tác trên Điện Thoại!</strong><br>
+            - Để nạp qua <strong>cáp USB Type-C (OTG)</strong> trên Android: Mở trình duyệt Chrome và bật cờ <code>chrome://flags/#enable-web-serial-on-android</code>.<br>
+            - <strong>Cách không dây (WiFi Portal):</strong> Giữ nút còi 5s để mở WiFi <code>COI-XE-ESP32</code> rồi truy cập <code>http://192.168.4.1</code> đổi bài tức thì!<br>
+            - 👉 Hoặc bấm <code>📦 Xuất sound_bank.bin</code> để lưu bộ âm thanh về điện thoại.
+          `;
+        } else {
+          alertBox.innerHTML = `
+            <strong>⚠️ Trình duyệt chưa bật tính năng mở cổng COM (Web Serial)!</strong><br>
+            - Vui lòng sử dụng trình duyệt <strong>Google Chrome, Microsoft Edge hoặc Opera</strong> trên máy tính.<br>
+            - Nếu đang mở file qua <code>file://</code>, hãy nhấp đúp file <code>nap_tieng_coi.bat</code> để chạy máy chủ cục bộ.<br>
+            - 👉 Hoặc bấm <code>📦 Xuất sound_bank.bin</code> ở trên để tải file về máy.
+          `;
+        }
         document.getElementById('btnStartFlash').disabled = true;
       } else {
         document.getElementById('btnStartFlash').disabled = false;

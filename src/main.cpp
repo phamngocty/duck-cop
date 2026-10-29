@@ -92,6 +92,8 @@ void IRAM_ATTR onSampleTimer() {
 #else
             ledcWrite(PWM_CHANNEL, sample);
 #endif
+            // Đèn LED sáng (LOW) khi đang phát âm thanh
+            gpio_set_level((gpio_num_t)LED_PIN, 0);
         } else {
             is_playing = false;
             sample_idx = 0;
@@ -101,6 +103,8 @@ void IRAM_ATTR onSampleTimer() {
 #else
             ledcWrite(PWM_CHANNEL, 128);
 #endif
+            // Đèn LED tắt (HIGH) khi nghỉ
+            gpio_set_level((gpio_num_t)LED_PIN, 1);
         }
     } else {
         if (pause_ticks > 0) {
@@ -150,7 +154,10 @@ static void switchNextSound() {
 #if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION_MAJOR >= 3)
     timerAlarm(timer, 1000000 / isr_sample_rate, true, 0);
 #else
+    timerAlarmDisable(timer);
     timerAlarmWrite(timer, 1000000 / isr_sample_rate, true);
+    timerWrite(timer, 0);
+    timerAlarmEnable(timer);
 #endif
 
     // Phát thử tiếng mới ngay lập tức
@@ -222,7 +229,13 @@ static void initSoundBank() {
 }
 
 void setup() {
-    // 1. Cấu hình LEDC PWM tần số cao (156.25 kHz, 8-bit) - Khóa DC 128 chống bụp ngay microsecond đầu
+    // 1. Khởi tạo chân nút bấm & LED ngay từ microsecond đầu (kéo Pullup chống nhiễu / chân lơ lửng)
+    pinMode(BOOT_PIN, INPUT_PULLUP);
+    pinMode(EXT_BUTTON_PIN, INPUT_PULLUP);
+    pinMode(LED_PIN, OUTPUT);
+    digitalWrite(LED_PIN, LOW); // LOW = Bật sáng ngay microsecond đầu tiên của setup()
+
+    // 2. Cấu hình LEDC PWM tần số cao (156.25 kHz, 8-bit) - Khóa DC 128 chống bụp ngay lập tức
 #if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION_MAJOR >= 3)
     ledcAttach(AUDIO_PIN, PWM_FREQ, PWM_RESOLUTION);
     ledcWrite(AUDIO_PIN, 128);
@@ -232,10 +245,10 @@ void setup() {
     ledcWrite(PWM_CHANNEL, 128);
 #endif
 
-    // 2. Khởi tạo kho âm thanh
+    // 3. Khởi tạo kho âm thanh
     initSoundBank();
 
-    // 3. Nạp slot âm thanh: Ưu tiên đọc từ RTC SRAM (0 microsecond, không tốn thời gian đọc Flash)
+    // 4. Nạp slot âm thanh: Ưu tiên đọc từ RTC SRAM (0 microsecond, không tốn thời gian đọc Flash)
     uint8_t slot_to_play = 0;
     if (rtc_valid && rtc_saved_slot < total_active_slots) {
         slot_to_play = rtc_saved_slot;
@@ -250,7 +263,7 @@ void setup() {
     }
     applySlot(slot_to_play);
 
-    // 4. Cấu hình Hardware Timer ngắt ở tần số isr_sample_rate (Y hệt BACKUP copy)
+    // 5. Cấu hình Hardware Timer ngắt ở tần số isr_sample_rate (Y hệt BACKUP copy)
 #if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION_MAJOR >= 3)
     timer = timerBegin(1000000);
     timerAttachInterrupt(timer, &onSampleTimer);
@@ -261,12 +274,6 @@ void setup() {
     timerAlarmWrite(timer, 1000000 / isr_sample_rate, true);
     timerAlarmEnable(timer);
 #endif
-
-    // 5. Khởi tạo chân nút bấm đổi bài trên tay lái & LED
-    pinMode(BOOT_PIN, INPUT_PULLUP);
-    pinMode(EXT_BUTTON_PIN, INPUT_PULLUP);
-    pinMode(LED_PIN, OUTPUT);
-    digitalWrite(LED_PIN, HIGH);
 }
 
 void loop() {

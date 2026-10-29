@@ -1643,10 +1643,10 @@ html_template = r'''<!DOCTYPE html>
 
     // Cấu trúc 4 Slot chính của thiết bị
     const slots = [
-      { name: "Vit Coi Xe Chuan (Duck 2)", pcm: null, sampleRate: 16000, buffer: null, originalBuffer: null, trimStart: 0, trimEnd: 0, volume: 100 },
-      { name: "Vit Keu Don (Duck 1)", pcm: null, sampleRate: 16000, buffer: null, originalBuffer: null, trimStart: 0, trimEnd: 0, volume: 100 },
-      { name: "Vit Coi Doi (Double Quack)", pcm: null, sampleRate: 16000, buffer: null, originalBuffer: null, trimStart: 0, trimEnd: 0, volume: 100 },
-      { name: "Bo Rong (Cow Mooing)", pcm: null, sampleRate: 16000, buffer: null, originalBuffer: null, trimStart: 0, trimEnd: 0, volume: 100 }
+      { name: "Vit Coi Xe Chuan (Duck 2)", pcm: null, sampleRate: 22050, buffer: null, originalBuffer: null, trimStart: 0, trimEnd: 0, volume: 100 },
+      { name: "Vit Keu Don (Duck 1)", pcm: null, sampleRate: 22050, buffer: null, originalBuffer: null, trimStart: 0, trimEnd: 0, volume: 100 },
+      { name: "Vit Coi Doi (Double Quack)", pcm: null, sampleRate: 22050, buffer: null, originalBuffer: null, trimStart: 0, trimEnd: 0, volume: 100 },
+      { name: "Bo Rong (Cow Mooing)", pcm: null, sampleRate: 22050, buffer: null, originalBuffer: null, trimStart: 0, trimEnd: 0, volume: 100 }
     ];
 
     let currentSlotIdx = 0;
@@ -1788,7 +1788,7 @@ html_template = r'''<!DOCTYPE html>
       const newSlot = {
         name: `Slot ${newIdx}: ${presetName}`,
         pcm: null,
-        sampleRate: 16000,
+        sampleRate: 22050,
         buffer: null,
         originalBuffer: null,
         trimStart: 0,
@@ -1808,7 +1808,7 @@ html_template = r'''<!DOCTYPE html>
             newSlot.originalBuffer = buf;
             newSlot.trimStart = 0;
             newSlot.trimEnd = buf.duration;
-            newSlot.pcm = bufferToPCM8(buf);
+            ensureSlotPCM(newIdx);
             if (currentSlotIdx === newIdx) {
               selectSlot(newIdx);
             }
@@ -1903,7 +1903,7 @@ html_template = r'''<!DOCTYPE html>
             slots[i].trimStart = 0;
             slots[i].trimEnd = buf.duration;
             slots[i].volume = 100;
-            slots[i].pcm = bufferToPCM8(buf);
+            ensureSlotPCM(i);
           } catch (e) {
             console.error("Lỗi giải mã audio slot " + i, e);
           }
@@ -2899,11 +2899,11 @@ html_template = r'''<!DOCTYPE html>
       const endSample = Math.floor(trimEnd * rate);
       const numSamples = Math.max(1, endSample - startSample);
 
-      const targetRate = 16000;
+      const targetRate = 22050;
       const targetLen = Math.floor(numSamples * (targetRate / rate));
-      const pcm = new Uint8Array(160 + targetLen);
+      const pcm = new Uint8Array(220 + targetLen);
 
-      pcm.fill(128, 0, 160); // 10ms đệm 0x80 chống bụp loa
+      pcm.fill(128, 0, 220); // 10ms đệm 0x80 chống bụp loa ở 22050Hz
 
       // Nhân hệ số Volume đã chỉnh
       const volFactor = (slots[currentSlotIdx].volume || 100) / 100.0;
@@ -2913,7 +2913,7 @@ html_template = r'''<!DOCTYPE html>
         const srcIdx = startSample + Math.floor(i * ratio);
         const s = ch[Math.min(srcIdx, ch.length - 1)] * volFactor;
         // Chặn cận mềm [0, 255]
-        pcm[160 + i] = Math.max(0, Math.min(255, Math.round((s * 127) + 128)));
+        pcm[220 + i] = Math.max(0, Math.min(255, Math.round((s * 127) + 128)));
       }
 
       slots[currentSlotIdx].pcm = pcm;
@@ -3030,10 +3030,10 @@ html_template = r'''<!DOCTYPE html>
       const endSample = Math.floor((s.trimEnd || s.buffer.duration) * rate);
       const numSamples = Math.max(1, endSample - startSample);
 
-      const targetRate = 16000;
+      const targetRate = 22050;
       const targetLen = Math.floor(numSamples * (targetRate / rate));
-      const pcm = new Uint8Array(160 + targetLen);
-      pcm.fill(128, 0, 160); // 10ms DC 128 chống bụp loa
+      const pcm = new Uint8Array(220 + targetLen);
+      pcm.fill(128, 0, 220); // 10ms DC 128 chống bụp loa ở 22050Hz
 
       const volFactor = (s.volume || 100) / 100.0;
       const ratio = numSamples / targetLen;
@@ -3041,7 +3041,7 @@ html_template = r'''<!DOCTYPE html>
       for (let i = 0; i < targetLen; i++) {
         const srcIdx = startSample + Math.floor(i * ratio);
         const val = ch[Math.min(srcIdx, ch.length - 1)] * volFactor;
-        pcm[160 + i] = Math.max(0, Math.min(255, Math.round((val * 127) + 128)));
+        pcm[220 + i] = Math.max(0, Math.min(255, Math.round((val * 127) + 128)));
       }
       s.pcm = pcm;
       s.sampleRate = targetRate;
@@ -3073,7 +3073,7 @@ html_template = r'''<!DOCTYPE html>
 
         view.setUint32(slotHeadOffset, currOffset, true);
         view.setUint32(slotHeadOffset + 4, pcmLen, true);
-        view.setUint16(slotHeadOffset + 8, s.sampleRate || 16000, true);
+        view.setUint16(slotHeadOffset + 8, s.sampleRate || 22050, true);
         view.setUint16(slotHeadOffset + 10, 0, true);
 
         const nameBytes = new TextEncoder().encode((s.name || `Slot ${i}`).slice(0, 31));
