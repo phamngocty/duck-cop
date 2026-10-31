@@ -31,7 +31,7 @@ goto :EOF
 :NO_PYTHON
 echo [!] May tinh chua cai dat Python de chay may chu local.
 echo [*] Dang mo truc tiep giao dien Web Studio bang trinh duyet...
-start "" "%~dp0Audio_Studio.html"
+start "" "%~dp0index.html"
 echo.
 echo [!] LUU Y TRINH DUYET:
 echo     Neu mo truc tiep tu file, Chrome/Edge co the chan mo cong COM.

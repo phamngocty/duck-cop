@@ -32,7 +32,7 @@ if sys.platform.startswith('win'):
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SAMPLE_DIR = os.path.join(SCRIPT_DIR, "sounds_sample")
 INPUT_DIR = os.path.join(SCRIPT_DIR, "sounds_input")
-HTML_PATH = os.path.join(SCRIPT_DIR, "Audio_Studio.html")
+HTML_PATH = os.path.join(SCRIPT_DIR, "index.html")
 OUTPUT_BIN = os.path.join(SCRIPT_DIR, "sound_bank.bin")
 
 os.makedirs(SAMPLE_DIR, exist_ok=True)

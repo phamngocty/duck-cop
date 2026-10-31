@@ -1,10 +1,17 @@
-# TÀI LIỆU KỸ THUẬT TOÀN DIỆN: CÒI XE ESP32-C3 SUPER MINI (INSTANT SOUND FX & WIFI WEB PORTAL)
+# 🦆 CÒI XE ESP32-C3 SUPER MINI (INSTANT SOUND FX & WEB SERIAL 1-CLICK)
 
-- **Tác giả / Kênh DIY:** Tỷ (TỰ LÀM ĐIỆN TỬ)
-- **Phiên bản:** v2.0.0 (Bản nâng cấp toàn diện: Fast Boot < 1ms, Zero-Delay, 100% Full Volume, Web Portal WiFi, LittleFS Partition)
-- **Vi điều khiển:** ESP32-C3 Super Mini (RISC-V 32-bit 160MHz, Flash 4MB, 320KB SRAM)
-- **Mạch công suất:** PAM8403 (Amply Stereo Class-D 2x3W) hoặc PAM8610 (15W)
-- **Đối tượng áp dụng:** Xe máy, ô tô (Hệ thống điện 12V DC theo nhịp xi nhan hoặc còi phanh)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Web%20Studio-00f0aa?style=for-the-badge&logo=github)](https://phamngocty.github.io/duck-cop/)
+[![Technical Guide](https://img.shields.io/badge/Docs-Technical%20Guide-00d2ff?style=for-the-badge&logo=googledocs)](https://phamngocty.github.io/duck-cop/huong-dan.html)
+[![Web Serial](https://img.shields.io/badge/Web%20Serial-1--Click%20Flash-ffb834?style=for-the-badge&logo=googlechrome)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+
+> 🌐 **Phòng thu Web Studio nạp còi trực tuyến (Web Serial):** [https://phamngocty.github.io/duck-cop/](https://phamngocty.github.io/duck-cop/)  
+> 📖 **Tài liệu kỹ thuật & sơ đồ đấu nối chi tiết:** [https://phamngocty.github.io/duck-cop/huong-dan.html](https://phamngocty.github.io/duck-cop/huong-dan.html)  
+> 👤 **Tác giả / Kênh DIY:** [TỰ LÀM ĐIỆN TỬ](https://www.youtube.com/) (Phạm Ngọc Tỷ)  
+> 🏷️ **Phiên bản:** v2.0.0 (Fast Boot < 1ms, Zero-Delay, 100% Full Volume, Web Serial 1-Click, LittleFS Partition)
+> ⚡ **Vi điều khiển:** ESP32-C3 Super Mini (RISC-V 32-bit 160MHz, Flash 4MB, 320KB SRAM)
+> 🔊 **Mạch công suất:** PAM8403 (Amply Stereo Class-D 2x3W) hoặc PAM8610 (15W)
+> 🏍️ **Đối tượng áp dụng:** Xe máy, ô tô (Hệ thống điện 12V DC theo nhịp xi nhan hoặc còi phanh)
 
 ---
 

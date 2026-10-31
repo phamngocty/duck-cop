@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Còi Xe Thông Minh Speed FX Pro — Cẩm Nang Lắp Đặt & Hướng Dẫn Sử Dụng | TỰ LÀM ĐIỆN TỬ</title>
+  
+  <!-- SEO & Metadata -->
+  <meta name="description" content="Cẩm nang hướng dẫn lắp đặt và sử dụng cụm còi xe máy thông minh Speed FX Pro đổi âm thanh kỹ thuật số đỉnh cao. Đổi tiếng trên tay lái, nạp nhạc 1-Click qua điện thoại và máy tính. Phát triển bởi TỰ LÀM ĐIỆN TỬ.">
+  <meta name="keywords" content="còi xe máy thông minh, còi xe đổi tiếng, còi vịt xe máy, còi xi nhan esp32, speed fx pro, tự làm điện tử, pam8403, còi xe độ">
+  <meta name="author" content="TỰ LÀM ĐIỆN TỬ (Phạm Ngọc Tỷ)">
+  <meta name="theme-color" content="#07090e">
+
+  <!-- OpenGraph / Social Cards -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Còi Xe Thông Minh Speed FX Pro — Hướng Dẫn Sử Dụng & Nạp Tiếng 1-Click">
+  <meta property="og:description" content="Cụm còi xe máy đổi âm kỹ thuật số đỉnh cao: Khởi động tức thì < 1ms, không tiếng bụp, đổi 6 tiếng trên tay lái và nạp nhạc trực tiếp qua Web!">
+  <meta property="og:site_name" content="TỰ LÀM ĐIỆN TỬ">
+  <meta property="og:locale" content="vi_VN">
+
+  <!-- Google Fonts: Outfit (Header) + JetBrains Mono (Specs) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #07090e;
+      --bg-panel: #0d131f;
+      --bg-card: rgba(18, 25, 40, 0.85);
+      --border-dim: rgba(0, 240, 255, 0.15);
+      --border-bright: rgba(0, 240, 255, 0.45);
+      --cyan: #00f0ff;
+      --green: #00ff88;
+      --amber: #ffaa00;
+      --red: #ff2a5f;
+      --purple: #b026ff;
+      --text: #f0f4fc;
+      --text-muted: #8ca0ba;
+      --font-main: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      font-family: var(--font-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 14px 80px;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.08) 0%, transparent 60%),
+        radial-gradient(circle at 90% 40%, rgba(176, 38, 255, 0.04) 0%, transparent 40%),
+        radial-gradient(circle at 10% 70%, rgba(0, 255, 136, 0.04) 0%, transparent 40%);
+      background-attachment: fixed;
+      line-height: 1.65;
+    }
+
+    /* Container Shell */
+    .manual-shell {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      flex-direction: column;
+      gap: 26px;
+    }
+
+    /* Hero Header */
+    .manual-header {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-bright);
+      border-radius: 22px;
+      padding: 28px 32px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.65), 0 0 25px rgba(0, 240, 255, 0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+    .manual-header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--cyan), var(--purple), var(--green));
+    }
+
+    .header-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(176, 38, 255, 0.25));
+      border: 1px solid var(--border-bright);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      box-shadow: 0 0 24px rgba(0, 240, 255, 0.4);
+      flex-shrink: 0;
+    }
+
+    .brand-titles h1 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #ffffff, var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-titles p {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      margin-top: 3px;
+    }
+
+    .header-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      border: 1px solid transparent;
+    }
+    .badge.green { background: rgba(0, 255, 136, 0.12); border-color: rgba(0, 255, 136, 0.4); color: var(--green); }
+    .badge.cyan { background: rgba(0, 240, 255, 0.12); border-color: rgba(0, 240, 255, 0.4); color: var(--cyan); }
+    .badge.amber { background: rgba(255, 170, 0, 0.12); border-color: rgba(255, 170, 0, 0.4); color: var(--amber); }
+
+    .hero-cta-banner {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(176, 38, 255, 0.15) 100%);
+      border: 1px solid var(--cyan);
+      border-radius: 14px;
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .hero-cta-text h3 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+    .hero-cta-text p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+    }
+
+    .btn-flash-online {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #00f0ff 0%, #00ff88 100%);
+      color: #07090e;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 800;
+      text-decoration: none;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.5);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .btn-flash-online:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 35px rgba(0, 255, 136, 0.7);
+    }
+
+    /* Grid Sections */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-dim);
+      border-radius: 18px;
+      padding: 24px 28px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      backdrop-filter: blur(12px);
+    }
+
+    .card-title {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--border-dim);
+      padding-bottom: 12px;
+    }
+
+    /* Steps Styling */
+    .step-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+      margin-top: 14px;
+    }
+
+    .step-box {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-dim);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+    }
+    .step-box.highlight {
+      border-color: var(--green);
+      background: linear-gradient(180deg, rgba(0, 255, 136, 0.06) 0%, var(--bg-panel) 100%);
+    }
+
+    .step-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(0, 240, 255, 0.15);
+      color: var(--cyan);
+      border: 1px solid var(--cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      font-size: 14px;
+    }
+
+    .step-box h4 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .step-box p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+    }
+
+    .wire-tag {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      margin-right: 4px;
+    }
+    .wire-red { background: rgba(255, 42, 95, 0.2); color: #ff557f; border: 1px solid #ff2a5f; }
+    .wire-black { background: rgba(140, 160, 186, 0.2); color: #cfd9e8; border: 1px solid #8ca0ba; }
+    .wire-yellow { background: rgba(255, 170, 0, 0.2); color: #ffbe33; border: 1px solid #ffaa00; }
+
+    /* Sound Slots List */
+    .slot-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .slot-item {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-dim);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .slot-item-icon {
+      font-size: 24px;
+    }
+    .slot-item-info h5 {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    .slot-item-info p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* FAQ Box */
+    .faq-item {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-dim);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+    }
+    .faq-q {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 6px;
+    }
+    .faq-a {
+      font-size: 13.5px;
+      color: var(--text-muted);
+    }
+
+    /* Footer */
+    .manual-footer {
+      text-align: center;
+      padding: 30px 20px;
+      border-top: 1px solid var(--border-dim);
+      color: var(--text-muted);
+      font-size: 13.5px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+    }
+    .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .footer-links a {
+      color: var(--cyan);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      .manual-header { padding: 20px; }
+      .brand-titles h1 { font-size: 20px; }
+      .hero-cta-banner { flex-direction: column; align-items: flex-start; }
+      .btn-flash-online { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="manual-shell">
+
+    <!-- Hero Header -->
+    <header class="manual-header">
+      <div class="header-top-row">
+        <div class="brand-group">
+          <div class="brand-icon">🦆</div>
+          <div class="brand-titles">
+            <h1>Còi Xe Thông Minh Speed FX Pro</h1>
+            <p>HỆ THỐNG CÒI XE MÁY ĐỔI ÂM KỸ THUẬT SỐ ĐỈNH CAO • TỰ LÀM ĐIỆN TỬ</p>
+          </div>
+        </div>
+
+        <div class="header-badges">
+          <span class="badge green">● v2.0 PRO</span>
+          <span class="badge cyan">⚡ FAST BOOT &lt; 1MS</span>
+          <span class="badge amber">🛡️ CHỐNG NƯỚC AN TOÀN</span>
+        </div>
+      </div>
+
+      <!-- Banner trỏ thẳng vào Web Studio -->
+      <div class="hero-cta-banner">
+        <div class="hero-cta-text">
+          <h3>🌐 BẠN MUỐN ĐỔI TIẾNG CÒI MỚI NGAY BÂY GIỜ?</h3>
+          <p>Cắm cáp USB Type-C từ còi xe vào điện thoại Android hoặc máy tính để cắt nhạc và nạp 1-Click!</p>
+        </div>
+        <a href="https://phamngocty.github.io/duck-cop/" class="btn-flash-online">
+          <span>⚡</span> MỞ PHÒNG THU NẠP CÒI 1-CLICK
+        </a>
+      </div>
+    </header>
+
+    <!-- Hướng dẫn đấu nối xe máy -->
+    <section class="card">
+      <div class="card-title">
+        <span>🔌</span> 1. HƯỚNG DẪN LẮP ĐẶT LÊN XE MÁY (CHỈ 2 DÂY CỰC DỄ)
+      </div>
+      <p style="color: var(--text-muted); margin-bottom: 16px;">
+        Cụm còi đã được TỰ LÀM ĐIỆN TỬ ráp hoàn thiện, đổ keo chống nước nguyên khối và tích hợp sẵn mạch bảo vệ điện áp 12V. Bạn chỉ cần gắn vào xe theo 3 bước:
+      </p>
+
+      <div class="step-grid">
+        <div class="step-box highlight">
+          <div class="step-number">01</div>
+          <h4>CẮM DÂY NGUỒN 12V</h4>
+          <p>
+            - <span class="wire-tag wire-red">DÂY ĐỎ (+)</span>: Đấu vào dây dương sau rơ-le xi nhan (nếu dùng làm còi xi nhan) hoặc dây còi zin / đèn phanh.<br>
+            - <span class="wire-tag wire-black">DÂY ĐEN (-)</span>: Bắt vào ốc sườn kim loại xe máy (Mass Mass).
+          </p>
+        </div>
+
+        <div class="step-box">
+          <div class="step-number">02</div>
+          <h4>GẮN NÚT ĐỔI TIẾNG TAY LÁI</h4>
+          <p>
+            Kẹp nút bấm phụ đi kèm lên ghi-đông hoặc gần cùm tay lái xe máy. Đây là nút tiện lợi giúp bạn bấm chuyển đổi tiếng còi bất cứ lúc nào khi đang lái xe.
+          </p>
+        </div>
+
+        <div class="step-box">
+          <div class="step-number">03</div>
+          <h4>CỐ ĐỊNH CỦ LOA</h4>
+          <p>
+            Bắt củ loa vào vị trí thoáng bên trong dàn áo xe máy (như hốc mặt nạ hoặc dưới yếm). Chú ý hướng miệng loa chúc nhẹ xuống đất để thoát nước mưa dễ dàng.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cách đổi tiếng khi đang chạy xe -->
+    <section class="card">
+      <div class="card-title">
+        <span>🔘</span> 2. CÁCH ĐỔI TIẾNG TRỰC TIẾP TRÊN TAY LÁI (KHÔNG CẦN ĐIỆN THOẠI)
+      </div>
+      <div class="step-grid">
+        <div class="step-box highlight" style="grid-column: 1 / -1;">
+          <h4>THAO TÁC BẤM NÚT TRÊN TAY LÁI:</h4>
+          <p style="font-size: 14.5px; color: #ffffff; line-height: 1.8;">
+            1. Bật chìa khóa xe máy (cấp điện cho mạch).<br>
+            2. <strong>Nhấn nhả nhanh nút phụ 1 cái</strong> (nhấn dưới 1 giây rồi thả tay ra).<br>
+            3. Còi sẽ nhảy ngay sang tiếng tiếp theo xoay vòng và phát thử tại chỗ:<br>
+            <span style="color: var(--cyan); font-family: var(--font-mono); font-weight: 700;">
+              🦆 Slot 0 (Vịt chuẩn) ➔ 🦆 Slot 1 (Vịt đơn) ➔ 🐮 Slot 2 (Bò rống) ➔ 🚨 Slot 3 (Cảnh sát) ➔ 🔊 Slot 4 (Xi nhan bíp) ➔ 🎵 Slot 5 (Âm tự nạp) ➔ Quay lại Slot 0
+            </span><br>
+            4. <strong>Còi tự động lưu nhớ vĩnh viễn</strong>: Bạn tắt chìa khóa xe hay rút hẳn ắc quy thì lần sau bật lên còi vẫn kêu đúng tiếng vừa chọn!
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hướng dẫn nạp nhạc 1-click -->
+    <section class="card">
+      <div class="card-title">
+        <span>💻</span> 3. CÁCH NẠP NHẠC TÙY CHỌN TỪ ĐIỆN THOẠI / MÁY TÍNH
+      </div>
+      <p style="color: var(--text-muted); margin-bottom: 16px;">
+        Bạn có thể tự do đổi thành bất kỳ bài nhạc TikTok, tiếng động vật, lời nói hài hước nào bạn thích qua cổng USB Type-C tích hợp trên còi:
+      </p>
+
+      <div class="step-grid">
+        <div class="step-box">
+          <div class="step-number">A</div>
+          <h4>CẮM CÁP TYPE-C</h4>
+          <p>
+            Cắm dây cáp Type-C từ còi vào máy tính, hoặc cắm qua đầu chuyển OTG vào điện thoại Android.
+          </p>
+        </div>
+
+        <div class="step-box highlight">
+          <div class="step-number">B</div>
+          <h4>MỞ PHÒNG THU ONLINE</h4>
+          <p>
+            Truy cập đường dẫn chính thức: <a href="https://phamngocty.github.io/duck-cop/" target="_blank" style="color: var(--cyan); font-weight: 700;">https://phamngocty.github.io/duck-cop/</a> bằng Google Chrome hoặc Edge.
+          </p>
+        </div>
+
+        <div class="step-box">
+          <div class="step-number">C</div>
+          <h4>CẮT NHẠC & BẤM NẠP</h4>
+          <p>
+            Tải bài hát MP3/WAV lên, kéo chuột cắt đoạn ưng ý và bấm nút <strong>⚡ Nạp Còi Xe (Web Serial)</strong>. Quá trình nạp chỉ mất 3 giây!
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Danh sách âm có sẵn -->
+    <section class="card">
+      <div class="card-title">
+        <span>🎵</span> 4. DANH SÁCH 6 TIẾNG CÒI ĐÃ NẠP SẴN TRONG CÒI XE
+      </div>
+      <div class="slot-list">
+        <div class="slot-item">
+          <div class="slot-item-icon">🦆</div>
+          <div class="slot-item-info">
+            <h5>Slot 0: Vịt Còi Xe Chuẩn</h5>
+            <p>Tiếng vịt đanh giòn, cực to vang xa</p>
+          </div>
+        </div>
+        <div class="slot-item">
+          <div class="slot-item-icon">🦆</div>
+          <div class="slot-item-info">
+            <h5>Slot 1: Vịt Kêu Đơn</h5>
+            <p>Quạc dứt khoát 1 nhịp nhanh gọn</p>
+          </div>
+        </div>
+        <div class="slot-item">
+          <div class="slot-item-icon">🐮</div>
+          <div class="slot-item-info">
+            <h5>Slot 2: Bò Rống Hài Hước</h5>
+            <p>Tiếng bò trầm ấm, độc lạ</p>
+          </div>
+        </div>
+        <div class="slot-item">
+          <div class="slot-item-icon">🚨</div>
+          <div class="slot-item-info">
+            <h5>Slot 3: Còi Cảnh Sát</h5>
+            <p>Hụ còi ưu tiên dồn dập</p>
+          </div>
+        </div>
+        <div class="slot-item">
+          <div class="slot-item-icon">🔊</div>
+          <div class="slot-item-info">
+            <h5>Slot 4: Còi Bíp Xi-nhan</h5>
+            <p>Tiếng bíp thanh mảnh hiện đại</p>
+          </div>
+        </div>
+        <div class="slot-item">
+          <div class="slot-item-icon">🎵</div>
+          <div class="slot-item-info">
+            <h5>Slot 5: Âm Tự Nạp</h5>
+            <p>Nhạc riêng do bạn nạp qua Web</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hỏi đáp người dùng -->
+    <section class="card">
+      <div class="card-title">
+        <span>❓</span> 5. CÂU HỎI THƯỜNG GẶP KHI SỬ DỤNG (FAQ)
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">1. Còi này có làm hao bình ắc quy xe máy không?</div>
+        <div class="faq-a">Hoàn toàn không. Cụm còi dùng mạch hạ áp hiệu suất cao >92% và chỉ tiêu thụ dòng điện khi còi phát ra âm thanh. Khi không bấm còi, mạch ở trạng thái ngủ sâu gần như tiêu thụ 0mA.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">2. Đi mưa hoặc rửa xe có bị cháy mạch không?</div>
+        <div class="faq-a">Toàn bộ vi điều khiển và mạch công suất đã được TỰ LÀM ĐIỆN TỬ đổ keo silicon kín tuyệt đối chống nước. Bạn chỉ cần gắn loa hướng miệng chúc xuống dưới và tránh xịt vòi rửa xe áp lực cao thẳng vào trong lòng loa.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">3. Nếu tôi nạp file nhạc bị lỗi thì còi có bị câm không?</div>
+        <div class="faq-a">Không. Firmware có cơ chế tự phục hồi thông minh: Nếu file bạn nạp bị lỗi hoặc trống, còi sẽ tự động nhảy về Slot 0 (Tiếng Vịt còi xe chuẩn) để đảm bảo bạn luôn có còi báo hiệu an toàn trên đường.</div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="manual-footer">
+      <p>Sản phẩm sáng chế &amp; Sản xuất bởi <strong>TỰ LÀM ĐIỆN TỬ</strong> (Tác giả: Phạm Ngọc Tỷ)</p>
+      <div class="footer-links">
+        <a href="https://phamngocty.github.io/duck-cop/">Vào Phòng Thu Nạp Còi (Web Serial)</a> • 
+        <a href="https://www.youtube.com/" target="_blank">Kênh YouTube</a> • 
+        <a href="https://www.tiktok.com/" target="_blank">Kênh TikTok</a>
+      </div>
+      <p style="font-size: 12px; color: #586e8a; margin-top: 5px;">Bản quyền © 2026 TỰ LÀM ĐIỆN TỬ. Mọi quyền được bảo lưu.</p>
+    </footer>
+
+  </div>
+
+</body>
+</html>

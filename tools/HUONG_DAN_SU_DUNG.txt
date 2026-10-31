@@ -1,58 +1,116 @@
 ================================================================================
-   HƯỚNG DẪN SỬ DỤNG VÀ NẠP ÂM THANH CÒI XE ESP32-C3 SPEED FX
-   Bản quyền: Tự Làm Điện Tử (Dành riêng cho khách hàng & người dùng)
+   HƯỚNG DẪN SỬ DỤNG VÀ VẬN HÀNH CÒI XE ESP32-C3 SUPER MINI
+   (INSTANT SOUND FX & WIFI WEB PORTAL - PHIÊN BẢN v2.0.0)
+   Kênh sáng tạo: TỰ LÀM ĐIỆN TỬ (Tác giả: Tỷ)
 ================================================================================
 
-I. ĐẶC TÍNH NỔI BẬT CỦA CÒI XE:
+I. ĐẶC TÍNH NỔI BẬT & ĐỘT PHÁ CÔNG NGHỆ:
 --------------------------------------------------------------------------------
-- Sử dụng vi điều khiển ESP32-C3 kết hợp chip khuếch đại âm thanh PAM8403.
-- Khởi động siêu tốc 100%: Phát to rõ cực đại ngay mili-giây đầu tiên khi bật chìa khóa xe.
-- Bộ nhớ lưu trữ 5 tiếng còi độc lập (Slot 0 đến Slot 4).
-- Ghi nhớ vĩnh viễn tiếng đã chọn ngay cả khi tắt khóa xe hoặc rút ắc quy.
-- Tuyệt đối an toàn: Không bị sụt nguồn, dòng khởi động phẳng lì.
+1. Khởi động siêu tốc Zero-Overhead Fast Boot (< 1ms):
+   - Khi chạy xe bình thường (chớp xi nhan hoặc bấm còi): Mạch bỏ qua 100% WiFi,
+     Bluetooth, Web Server, NVS ghi chậm -> Còi phát âm thanh ngay lập tức trong
+     dưới 1ms, không bao giờ bị hụt hay trễ nhịp chớp xi nhan (~350ms).
+2. Âm lượng cực đại 100% RAW Full-Scale:
+   - Byte PCM (0 - 255) được bơm trực tiếp ra chân PWM qua ledcWrite với biên độ
+     đỉnh-đỉnh Vpp = 3.3V tối đa. Amply PAM8403 / PAM8610 phát huy 100% công suất,
+     tiếng kêu đanh giòn, vang xa khắp phố phường.
+3. Triệt tiêu hoàn toàn tiếng "BỤP" (Pop noise):
+   - Ngay microsecond đầu tiên của setup(), chân PWM được ghim về mức phân cực
+     DC 128 (1.65V) để nạp êm dịu tụ 100nF, màng loa không bị sốc dòng.
+4. Quản lý 6 khe âm thanh (Sound Bank):
+   - Gồm 5 âm thanh kinh điển chất lượng cao tích hợp sẵn trong bộ nhớ Flash PROGMEM
+     và 1 khe âm thanh tự nạp (Slot 5) lưu trữ trong phân vùng LittleFS (2.1 MB).
+5. Ghi nhớ vĩnh viễn:
+   - Ghi nhớ trạng thái âm thanh đã chọn vào RTC SRAM và NVS Flash, tắt khóa xe hay
+     tháo ắc quy thì lần bật sau còi vẫn kêu đúng tiếng bạn đã chọn.
+6. Web Portal WiFi & Captive Portal thông minh:
+   - Cho phép nạp âm thanh mới trực tiếp từ điện thoại (iPhone/Android) qua sóng WiFi
+     ở bất cứ đâu mà không cần máy tính hay cài đặt bất kỳ phần mềm nào.
 
-II. CÁCH ĐỔI TIẾNG TRỰC TIẾP TRÊN XE (KHÔNG CẦN DÙNG MÁY TÍNH):
+II. SƠ ĐỒ ĐẤU DÂY VÀ KẾT NỐI PHẦN CỨNG:
 --------------------------------------------------------------------------------
-1. Mạch đã có sẵn đường dây nối ra Nút Bấm Phụ trên tay lái xe (hoặc nút BOOT trên mạch).
-2. Khi đang bật chìa khóa xe:
-   - Nhấn nhả nhanh nút 1 cái (nhấn dưới 1 giây rồi thả tay ra).
-   - Còi sẽ chuyển ngay sang tiếng tiếp theo:
-       Slot 0 -> Slot 1 -> Slot 2 -> Slot 3 -> Slot 4 -> quay lại Slot 0.
-   - Còi sẽ phát thử ngay tiếng mới để bạn nghe và tự động lưu nhớ lại.
-3. Tắt khóa xe rồi bật lại -> Còi sẽ luôn kêu đúng tiếng bạn vừa chọn!
+1. Sơ đồ khối nguyên lý:
+   [Nguồn 12V Xi-nhan / Phanh] 
+       ---> (+) 12V ---> [Hạ áp Mini360/MP1584: Chỉnh 5.0V] ---> 5V ESP32 & PAM8403
+       ---> (-) Mass sườn xe ---> [GND CHUNG] ---> GND ESP32, Hạ áp, PAM8403
 
-III. DANH SÁCH BỘ SƯU TẬP ÂM MẪU SẴN CÓ TRONG AUDIO STUDIO (9+ TIẾNG):
+2. Bảng chân kết nối trên ESP32-C3 Super Mini:
+   - GPIO3 (AUDIO_PIN)     : Xuất PWM 156.25 kHz -> Qua trở 1kΩ nối tiếp tụ 100nF
+                             (mã 104) xuống GND -> Nối vào ngõ L_IN hoặc R_IN PAM8403.
+   - GPIO8 (LED_PIN)       : Đèn LED xanh tích hợp (Active LOW: sáng khi còi kêu và
+                             nhấp nháy khi ở chế độ WiFi Portal).
+   - GPIO9 (BOOT_PIN)      : Nút bấm BOOT tích hợp sẵn trên mạch vi điều khiển.
+   - GPIO1 (EXT_BUTTON_PIN): Dây nối nút bấm phụ ngoài tay lái xe (Active LOW).
+   - 5V                    : Nguồn dương 5.0V từ ngõ ra OUT+ mạch hạ áp.
+   - GND                   : Nối chung Mass toàn bộ hệ thống.
+
+III. DANH MỤC 6 KHE ÂM THANH (SOUND BANK):
 --------------------------------------------------------------------------------
-- 🦆 Slot 0: Vịt Còi Xe Chuẩn (Tiếng vịt đanh giòn, kêu to vang xa, chuẩn âm lượng)
-- 🦆 Slot 1: Vịt Kêu Đơn (Quạc dứt khoát 1 nhịp nhanh gọn)
-- 🦆 Slot 2: Vịt Còi Đôi (Quạc... Quạc kép vang xa)
-- 🐮 Slot 3: Bò Rống (Tiếng bò kêu trầm ấm, độc đáo)
-- 🚨 Slot 4: Còi Cảnh Sát (Hụ còi ưu tiên dồn dập)
-- 🏍️ Tiếng Còi Xe Máy Bim Bim (Hợp âm kép còi zin xe máy đanh thép)
-- 🚂 Tiếng Còi Tàu Hỏa (Kèn ba bè trầm hùng, âm vang cực xa)
-- 🔫 Tiếng Súng Laser Sci-Fi (Âm thanh không gian viễn tưởng vui nhộn)
-- 😂 Tiếng Vịt Donald Cười (Tràng cười quác quác ngộ nghĩnh)
+- 🦆 Slot 0: Vịt Còi Xe Chuẩn (Duck 2 - 32kHz)
+     -> Tiếng vịt đanh giòn, 800 mẫu đệm DC êm dịu, kêu cực vang dội.
+- 🦆 Slot 1: Vịt Kêu Đơn (Duck 1 - 16kHz)
+     -> Tiếng quạc ngắn gọn, dứt khoát 1 nhịp.
+- 🐮 Slot 2: Bò Rống (Cow Mooing - 16kHz)
+     -> Tiếng bò kêu hài hước, độc lạ và trầm ấm.
+- 🚨 Slot 3: Còi Cảnh Sát (Police Siren - 16kHz)
+     -> Tiếng hụ còi ưu tiên dồn dập, mạnh mẽ.
+- 🔊 Slot 4: Còi Bíp Xi-nhan (Beep Beep - 16kHz)
+     -> Tiếng bíp kép thanh mảnh, hiện đại.
+- 🎵 Slot 5: Âm Tự Nạp (LittleFS Custom Audio)
+     -> Phát file âm thanh tùy biến do chính người dùng nạp từ điện thoại qua WiFi.
 
-IV. HƯỚNG DẪN TỰ ĐỔI TIẾNG CÒI BẰNG NHẠC CỦA BẠN:
+IV. HƯỚNG DẪN VẬN HÀNH CHI TIẾT:
 --------------------------------------------------------------------------------
-CÁCH 1: NẠP TRỰC TIẾP 1-CLICK TRÊN WEB (TIỆN LỢI NHẤT - KHÔNG CẦN TẢI FILE BIN):
-1. Nhấp đúp chuột vào file: nap_tieng_coi.bat
-   -> Máy tính sẽ tự động bật máy chủ local tại http://localhost:8765 và mở trình duyệt Chrome/Edge.
-2. Chọn Slot muốn thay đổi (Slot 0 đến Slot 4):
-   - Chọn mẫu có sẵn trong Thư viện 9+ tiếng độc quyền hoặc bấm "Đổi bằng file MP3/WAV" bài hát của bạn.
-   - Kéo thanh âm lượng (100% - 250%) hoặc cắt đoạn sóng âm ưng ý.
-3. Cắm cáp USB Type-C từ còi xe vào máy tính.
-4. Bấm nút "⚡ Nạp Còi Xe (Web Serial)" ở góc trên bên phải -> Chọn cổng COM của còi xe -> Xong trong 3 giây!
-   (Web Serial nạp trực tiếp vào phân vùng 0x1E0000 trong nháy mắt, còi tự khởi động lại và nhận âm thanh mới).
+1. KHI CHẠY XE BÌNH THƯỜNG (CHẾ ĐỘ CÒI TỨC THÌ < 1MS):
+   - Mỗi lần gạt xi nhan hoặc bấm còi/đạp phanh, nguồn điện 12V được cấp vào mạch.
+   - Nút bấm thả nổi (không bị nhấn giữ) -> Mạch nhận diện chế độ chạy xe:
+     Bỏ qua toàn bộ WiFi, không trễ, phát ngay âm thanh đã cài đặt trong < 1ms!
+   - Khi xi nhan ngắt điện -> Mạch tắt. Nhịp chớp tiếp theo mạch lại phát ngay.
 
-CÁCH 2: NẠP ONLINE QUA GITHUB PAGES (DÀNH CHO MỌI THIẾT BỊ KHÔNG CẦN CÀI ĐẶT):
-1. Truy cập trực tiếp trang web Audio Studio qua đường dẫn GitHub Pages (HTTPS).
-   (Hỗ trợ cả máy tính lẫn điện thoại Android cắm cáp OTG Type-C vào còi xe).
-2. Tùy chỉnh âm thanh và bấm "⚡ Nạp Còi Xe (Web Serial)" để nạp trực tiếp qua cổng COM.
+2. ĐỔI TIẾNG TRỰC TIẾP BẰNG NÚT BẤM TRÊN TAY LÁI (KHÔNG CẦN MÁY TÍNH/ĐIỆN THOẠI):
+   - Bật chìa khóa xe hoặc cấp điện liên tục cho mạch.
+   - Nhấn nhả nhanh nút bấm (thời gian nhấn từ 35ms đến 1.5 giây rồi thả tay ra).
+   - Còi sẽ chuyển tuần tự sang âm tiếp theo:
+       Slot 0 -> Slot 1 -> Slot 2 -> Slot 3 -> Slot 4 -> Slot 5 -> quay lại Slot 0
+   - Còi sẽ phát ngay tiếng mới để bạn nghe thử trực tiếp tại chỗ và tự động lưu nhớ.
+   - Tắt khóa xe rồi bật lại -> Còi sẽ luôn kêu đúng tiếng bạn vừa chọn!
 
-CÁCH 3: NẠP TRUYỀN THỐNG (OFFLINE HOẶC TRÌNH DUYỆT KHÔNG CÓ WEB SERIAL):
-1. Trên giao diện Studio, bấm "📦 Xuất sound_bank.bin".
-2. Cắm cáp USB và chạy file nạp cũ hoặc dùng thư mục sounds_input/.
+3. NẠP ÂM THANH MỚI TỪ ĐIỆN THOẠI QUA WIFI WEB PORTAL:
+   Bước 1: Kích hoạt chế độ Cài đặt WiFi
+     - Cách 1: Nhấn giữ nút BOOT (hoặc nút phụ trên tay lái) trong lúc cấp nguồn.
+     - Cách 2: Khi mạch đang có điện, nhấn giữ nút bấm lâu hơn 2.5 giây.
+     -> Mạch sẽ kêu 2 tiếng "Bíp... Bíp" và đèn LED xanh bắt đầu nhấp nháy báo
+        hiệu đã phát WiFi Web Portal thành công.
+   Bước 2: Kết nối WiFi trên điện thoại
+     - Mở điện thoại (iPhone hoặc Android), vào phần Cài đặt WiFi.
+     - Tìm và kết nối vào mạng WiFi: "COI-XE-ESP32" (Không cần mật khẩu).
+     - Trình duyệt sẽ tự động bật trang cấu hình Captive Portal.
+       (Nếu không tự bật, mở trình duyệt Chrome/Safari và truy cập: http://192.168.4.1)
+   Bước 3: Tải nhạc và nạp vào còi xe
+     - Bấm "Chọn File Âm Thanh" để tải lên bài hát, đoạn ghi âm (MP3, WAV, M4A...).
+     - Kéo thanh chọn trực tiếp trên biểu đồ sóng âm để cắt đoạn nhạc ưng ý nhất.
+     - Bấm "Nghe thử trên điện thoại" hoặc "Phát thử ra loa xe" để kiểm tra âm lượng.
+     - Bấm "Lưu Vào Còi Xe": Dữ liệu âm thanh sẽ được nạp thẳng vào phân vùng
+       LittleFS và vi điều khiển tự động kích hoạt Slot 5.
+   Bước 4: Hoàn tất
+     - Tắt nguồn còi và bật lại bình thường -> Còi xe sẽ phát ngay âm thanh bạn vừa
+       nạp với tốc độ siêu tốc < 1ms!
 
-Chúc bạn có những trải nghiệm tuyệt vời và thú vị với chiếc còi xe của mình!
+V. CÂU HỎI THƯỜNG GẶP (TROUBLESHOOTING):
+--------------------------------------------------------------------------------
+1. Tại sao tiếng còi bản v2.0 lại kêu to hơn hẳn các bản trước?
+   - Nhờ loại bỏ hoàn toàn các bộ lọc làm mềm số gây suy hao biên độ. Bản v2.0 bơm
+     trực tiếp byte RAW 0-255 ra PWM với biên độ đỉnh-đỉnh 3.3V cực đại, giúp amply
+     PAM8403 khai thác trọn vẹn 100% công suất 3W.
+2. Còi có bị trễ nhịp chớp xi nhan không?
+   - Tuyệt đối không. Mạch chỉ mất 15µs khóa DC và < 1ms để xuất âm thanh, khớp hoàn
+     hảo với chu kỳ chớp tắt ~350ms của rơ-le xi nhan xe máy.
+3. Nếu file âm thanh tự nạp trên Web bị lỗi thì còi có bị câm không?
+   - Không. Firmware có cơ chế tự động bảo vệ: Nếu file trong LittleFS bị lỗi hoặc
+     chưa nạp, mạch sẽ tự động nhảy về Slot 0 (Vịt còi xe chuẩn), đảm bảo còi luôn
+     kêu an toàn khi lưu thông trên đường.
+4. Mạch có cần máy tính hay cài app để nạp tiếng không?
+   - Không cần. Chỉ cần điện thoại kết nối vào WiFi của còi xe là nạp được ngay.
+
+Chúc bạn có những chuyến đi thú vị và độc đáo cùng chiếc còi xe thông minh!
 ================================================================================
